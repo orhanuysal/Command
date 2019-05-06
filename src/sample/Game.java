@@ -54,15 +54,12 @@ public class Game extends Page {
         createRelations(  );
         draw();
 
-
-
-
-//        try {
-//            Pawn p = new Pawn(cells[9][9], 0);
-//            //p.draw(pen);
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            Pawn p = new Pawn(cells[9][9], 0);
+            p.draw(pen);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     private ArrayList<Pair<Integer,Integer>> getPlayer1Pawns() {
@@ -144,7 +141,7 @@ public class Game extends Page {
                 double x = MinX + 1.5*LENGTH*j;
                 double y = MinY + 2*H*i;
                 if( j%2 == 1 ) y -= H;
-                cells[i][j] = new Cell( x, y, i, j, pen, this );
+                cells[i][j] = new Cell( x, y, pen );
             }
         }
 
@@ -157,4 +154,5 @@ public class Game extends Page {
             }
         }
     }
+
 }
