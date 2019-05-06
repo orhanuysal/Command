@@ -6,6 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
 import javafx.util.Pair;
 
+import javax.swing.plaf.synth.SynthEditorPaneUI;
 import java.util.ArrayList;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
@@ -22,23 +23,26 @@ public class Game extends Page {
     private final double H = Math.sqrt( 3 )*LENGTH/2; // Height of a hexagon
     private final int rows = 10;
     private final int columns = 10;
+    private int stage;
+    private Player p0, p1;
 
     public int selectedX;
     public int selectedY;
-
-    private Pawn[] pawns;
+    public Cell selected;
 
     private int turn = 0;
 
     private Cell[][] cells;
     private int spell;
-    private boolean debug = true;
+    private boolean debug = false;
+    private Button placePawn;
 
-    public void setSelect( int x, int y ) {
+    public Cell setSelect( int x, int y ) {
 
         selectedX = x;
         selectedY = y;
         Cell c = cells[selectedX][selectedY];
+        selected = cells[selectedX][selectedY];
         for(int i=0;i<rows;i++)
             for(int j=0;j<columns;j++) {
                 if( i == selectedX && j == selectedY ) cells[i][j].setState( 1 );
@@ -53,6 +57,7 @@ public class Game extends Page {
                 for(int j=0;j<columns;j++)
                     cells[i][j].setIsPossible( 0 );
         }
+        return selected;
     }
 
     public Game(GridPane root) {
@@ -62,38 +67,21 @@ public class Game extends Page {
         root.add( pen, 0, 0 );
 
         cells = new Cell[rows][columns];
+        turn = 0;
+        stage = 0;
 
-        addButtons();
+        //addButtons();
 
-        createPawns( getPlayer1Pawns(), getPlayer2Pawns() );
+        //addButtons();
+
+        //createPawns( getPlayer1Pawns(), getPlayer2Pawns() );
         createComponents();
         createRelations(  );
         draw();
 
-//        try {
-//            Pawn p = new Pawn(cells[9][9], 0);
-//            p.draw(pen);
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-    }
-
-    private ArrayList<Pair<Integer,Integer>> getPlayer1Pawns() {
-        ArrayList<Pair<Integer,Integer>> pawns = new ArrayList<>();
-        // doldur
-        return pawns;
-    }
-
-    private ArrayList<Pair<Integer,Integer>> getPlayer2Pawns() {
-        ArrayList<Pair<Integer,Integer>> pawns = new ArrayList<>();
-        // doldur
-        return pawns;
-    }
-
-    private void createPawns(ArrayList<Pair<Integer,Integer>> locs, ArrayList<Pair<Integer,Integer>> locs2 ) {
-
-
-
+        p0 = new Player();
+        p1 = new Player();
+        handleStage0();
     }
 
     private void addButtons() {
@@ -186,11 +174,103 @@ public class Game extends Page {
     }
 
     private void proceed() {
+        System.out.println("On Proceed!!\n");
+
+        Player pl = p0, en = p1;
+        if( turn == 1 ) {pl = p1;en = p0;}
+
+        int ownPawn = 1;
+        if( turn == 1 ) ownPawn = 2;
+
+        for(int i=0;i<(int)pl.pawns.size();i++) {
+            Pawn p = pl.pawns.get(i);
+
+            int d = p.direction;
+            Cell nex = p.c.adj.get( d );
+            if( nex != null && nex.contains != Cell.BLOCK && nex.contains != ownPawn ) {
+                if( nex.contains == (turn^1)+1 ) {
+                    en.erase( nex );
+                } else if( nex.contains == Cell.LAVA ) {
+                    p.relocate( nex );
+                    pl.erase( nex );
+                    i--;
+                }
+                if( p != null ) p.relocate( nex );
+            }
+        }
+
 
         turn ^= 1;
     }
 
 
+
+
+    private void handleStage0(){
+
+         placePawn = createButon("Place Pawn", 40, event -> {
+            if (turn == 0 && p0.pawnsToPlace != 0) {
+                if( selected.isPossible == 1 )
+                    try {
+                        Pawn p = new Pawn(selected, 0);
+                        p.draw(pen);
+                        p0.pawnsToPlace--;
+                        turn = 1;
+                        p0.addPawn( p );
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+            } else if (turn == 1 && p1.pawnsToPlace != 0) {
+                if( selected.isPossible == 1 )
+                    try {
+                        Pawn p = new Pawn(selected, 1);
+                        p.draw(pen);
+                        p1.pawnsToPlace--;
+
+                        if( p1.pawnsToPlace == 0 ) {
+                            System.out.println("Stage0 completed");
+                            clear();
+                            handleStage1();
+                        }
+                        p.rotate(); p.rotate(); p.rotate();
+                        turn = 0;
+                        p1.addPawn( p );
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+            }
+            if(p1.pawnsToPlace != 0) checkPlaces();
+        });
+        pen.getChildren().add(placePawn);
+        checkPlaces();
+    }
+
+    public void clear() {
+
+        for(int i=0;i<rows;i++)
+            for(int j=0;j<columns;j++)
+                cells[i][j].setIsPossible(0);
+    }
+
+    private void checkPlaces() {
+        if( turn == 0 ) {
+            clear();
+            for(int i=0;i<2;i++)
+                for(int j=0;j<columns;j++)
+                    cells[i][j].setIsPossible(1);
+        } else {
+
+            clear();
+            for(int i=rows-2;i<rows;i++)
+                for(int j=0;j<columns;j++)
+                    cells[i][j].setIsPossible(1);
+        }
+    }
+
+    private void handleStage1() {
+        placePawn.setVisible( false );
+        addButtons();
+    }
 
     private void createRelations() {
         for (int i = 0; i < rows; i++) {
@@ -222,7 +302,6 @@ public class Game extends Page {
                 cells[i][j] = new Cell( x, y, i, j, pen, this );
             }
         }
-
     }
 
     public void draw() {
