@@ -3,6 +3,7 @@ package sample;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 
 import java.io.FileInputStream;
@@ -43,7 +44,7 @@ public class Pawn {
 
         pawnImage.setLayoutX(x);
         pawnImage.setLayoutY(y);
-        //pawnImage.setOnMouseClicked();
+        //pawnImage.addEventHandler(MouseEvent.);
         pen.getChildren().addAll(pawnImage);
     }
 }
