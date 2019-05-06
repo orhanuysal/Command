@@ -16,19 +16,31 @@ public class Game extends Page {
     private Group pen;
     private final int MinX = 100;
     private final int MinY = 100;
-    public static final int LENGTH = 20; // Side Lenght of a hexagon
+    public static final int LENGTH = 40; // Side Lenght of a hexagon
     private final double H = Math.sqrt( 3 )*LENGTH/2; // Height of a hexagon
     private final int rows = 10;
     private final int columns = 10;
 
-    private Cell selectedCell;
+    public int selectedX;
+    public int selectedY;
 
     private Pawn[] pawns;
 
     private Cell[][] cells;
 
+    public void setSelect( int x, int y ) {
+
+        selectedX = x;
+        selectedY = y;
+        for(int i=0;i<rows;i++)
+            for(int j=0;j<columns;j++) {
+                if( i == selectedX && j == selectedY ) cells[i][j].setState( 1 );
+                else cells[i][j].setState( 0 );
+            }
+    }
+
     public Game(GridPane root) {
-        selectedCell = null;
+
         this.root = root;
         pen = new Group();
         root.add( pen, 0, 0 );
@@ -42,12 +54,15 @@ public class Game extends Page {
         createRelations(  );
         draw();
 
-        try {
-            Pawn p = new Pawn(cells[9][9], 0);
-            p.draw(pen);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+
+
+
+//        try {
+//            Pawn p = new Pawn(cells[9][9], 0);
+//            //p.draw(pen);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private ArrayList<Pair<Integer,Integer>> getPlayer1Pawns() {
@@ -129,7 +144,7 @@ public class Game extends Page {
                 double x = MinX + 1.5*LENGTH*j;
                 double y = MinY + 2*H*i;
                 if( j%2 == 1 ) y -= H;
-                cells[i][j] = new Cell( x, y, pen );
+                cells[i][j] = new Cell( x, y, i, j, pen, this );
             }
         }
 

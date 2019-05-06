@@ -13,7 +13,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         GridPane root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         primaryStage.setTitle("Command!!");
-
+        System.out.println("Start!!!\n");
         Game game = new Game( root );
 
         primaryStage.setScene(new Scene(root, primaryStage.getWidth(), primaryStage.getHeight()));
