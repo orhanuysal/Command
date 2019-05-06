@@ -8,7 +8,6 @@ import javafx.scene.effect.Light;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polyline;
 
-
 public class Cell extends Parent {
     public double x, y;
     public Group root;
