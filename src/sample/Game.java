@@ -5,6 +5,7 @@ import javafx.scene.Parent;
 import javafx.scene.layout.GridPane;
 
 import java.awt.*;
+import java.io.FileNotFoundException;
 
 
 public class Game extends Page {
@@ -31,6 +32,13 @@ public class Game extends Page {
         createComponents();
         createRelations(  );
         draw();
+
+        try {
+            Pawn p = new Pawn(cells[9][9], 0);
+            p.draw(pen);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     private void createRelations() {
