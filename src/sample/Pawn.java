@@ -43,6 +43,7 @@ public class Pawn {
 
         pawnImage.setLayoutX(x);
         pawnImage.setLayoutY(y);
+        //pawnImage.setOnMouseClicked();
         pen.getChildren().addAll(pawnImage);
     }
 }
