@@ -141,7 +141,7 @@ public class Game extends Page {
                 double x = MinX + 1.5*LENGTH*j;
                 double y = MinY + 2*H*i;
                 if( j%2 == 1 ) y -= H;
-                cells[i][j] = new Cell( x, y, pen );
+                cells[i][j] = new Cell( x, y, i, j, pen, this );
             }
         }
 
