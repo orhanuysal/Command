@@ -8,6 +8,8 @@ import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class Game extends Page {
@@ -26,17 +28,31 @@ public class Game extends Page {
 
     private Pawn[] pawns;
 
+    private int turn = 0;
+
     private Cell[][] cells;
+    private int spell;
+    private boolean debug = true;
 
     public void setSelect( int x, int y ) {
 
         selectedX = x;
         selectedY = y;
+        Cell c = cells[selectedX][selectedY];
         for(int i=0;i<rows;i++)
             for(int j=0;j<columns;j++) {
                 if( i == selectedX && j == selectedY ) cells[i][j].setState( 1 );
                 else cells[i][j].setState( 0 );
             }
+        if( spell > 0 ) {
+            if( c.isPossible == 1 ) {
+                if( spell == Cell.BLOCK ) c.setContains( Cell.BLOCK );
+                if( spell == Cell.LAVA ) c.setContains( Cell.LAVA );
+            }
+            for(int i=0;i<rows;i++)
+                for(int j=0;j<columns;j++)
+                    cells[i][j].setIsPossible( 0 );
+        }
     }
 
     public Game(GridPane root) {
@@ -54,12 +70,12 @@ public class Game extends Page {
         createRelations(  );
         draw();
 
-        try {
-            Pawn p = new Pawn(cells[9][9], 0);
-            p.draw(pen);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            Pawn p = new Pawn(cells[9][9], 0);
+//            p.draw(pen);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private ArrayList<Pair<Integer,Integer>> getPlayer1Pawns() {
@@ -90,24 +106,79 @@ public class Game extends Page {
                                     createButon("Finsih turn", 280, event -> {proceed();})
         );
     }
+
+
     private void guard() {
 
+        Cell selected = cells[selectedX][selectedY];
+        int p = Cell.PAWN;
+        if( turn == 1 ) p = Cell.PAWN2;
+        if( debug || selected.contains == p ) {
+
+            for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
+                if( c.getValue().contains == Cell.EMPTY )
+                    c.getValue(  ).setIsPossible( 1 );
+
+            spell = Cell.BLOCK;
+        }
     }
 
     private void burn() {
 
+        Cell selected = cells[selectedX][selectedY];
+        int p = Cell.PAWN;
+        if( turn == 1 ) p = Cell.PAWN2;
+        if( debug || selected.contains == p ) {
+            for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
+                if( c.getValue().contains == Cell.EMPTY )
+                    c.getValue(  ).setIsPossible( 1 );
+
+            spell = Cell.LAVA;
+        }
     }
 
     private void speed() {
-        //if( selectedCell ==  );
+
+        Cell selected = cells[selectedX][selectedY];
+        int p = Cell.PAWN;
+        if( turn == 1 ) p = Cell.PAWN2;
+
+        if (debug || selected.contains == p) {
+
+        }
     }
 
     private void portal() {
+        Cell selected = cells[selectedX][selectedY];
+        int p = Cell.PAWN;
+        if( turn == 1 ) p = Cell.PAWN2;
 
+        if (debug || selected.contains == p) {
+
+        }
     }
 
     private void rotate() {
+        Cell selected = cells[selectedX][selectedY];
+        int p = Cell.PAWN;
+        if( turn == 1 ) p = Cell.PAWN2;
 
+        if (debug || selected.contains == p) {
+            if( selected.adj.size() == 6 ) {
+                System.out.println("On Rotate!!\n");
+                ArrayList<Integer> hold = new ArrayList<>();
+                int beg = -1;
+                for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() ) {
+                    if( beg == -1 ) beg = c.getValue().contains;
+                    else hold.add(c.getValue().contains);
+                }
+                hold.add( beg );
+                beg = 0;
+                for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
+                    c.getValue().setContains( hold.get( beg++ ) );
+
+            }
+        }
     }
 
     private void range() {
@@ -116,6 +187,7 @@ public class Game extends Page {
 
     private void proceed() {
 
+        turn ^= 1;
     }
 
 
@@ -123,9 +195,15 @@ public class Game extends Page {
     private void createRelations() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                if( j+1 < columns ) connect( cells[i][j], cells[i][j+1], 0 );
-                if( j+1 < columns && i+1 < rows ) connect( cells[i][j], cells[i+1][j+1], 1 );
-                if( i+1 < rows ) connect( cells[i][j], cells[i+1][j], 2 );
+                if( j % 2 == 0 ) {
+                    if (j + 1 < columns) connect(cells[i][j], cells[i][j + 1], 0);
+                    if (j + 1 < columns && i + 1 < rows) connect(cells[i][j], cells[i + 1][j + 1], 1);
+                    if (i + 1 < rows) connect(cells[i][j], cells[i + 1][j], 2);
+                } else {
+                    if (i > 0 && j + 1 < columns) connect(cells[i][j], cells[i-1][j + 1], 0);
+                    if (j + 1 < columns) connect(cells[i][j], cells[i][j + 1], 1);
+                    if (i + 1 < rows) connect(cells[i][j], cells[i + 1][j], 2);
+                }
             }
         }
     }

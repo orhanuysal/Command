@@ -20,10 +20,13 @@ public class Cell extends Parent {
     public int idx, idy;
     public Group root;
 
-//    public static final int EMPTY = 0;
-//    public static final int SELECTED = 1;
-//    public static final int POSSIBLE = 2;
+    public static final int EMPTY = 0;
+    public static final int PAWN = 1;
+    public static final int PAWN2 = 2;
+    public static final int LAVA = 3;
+    public static final int BLOCK = 4;
 
+    public int contains = 0;
     public int isSelected = 0;
     public int isPossible = 0;
     public Polygon hexagon;
@@ -60,12 +63,28 @@ public class Cell extends Parent {
 
     void setState( int val ) {
         isSelected = val;
+        decideColor();
+    }
+
+    void setIsPossible( int c ) {
+        isPossible = c;
+        decideColor();
+    }
+
+    void setContains( int val ) {
+        contains = val;
+        decideColor();
+    }
+
+    void decideColor() {
 
         if( isPossible == 0 ) hexagon.setFill(new Color( 0.0, 0.0, 0.0, 0.0 ));
         if( isPossible == 1 ) hexagon.setFill(new Color( 0.2, 0.5, 0.5, 0.1 ));
 
         if( isSelected == 1 ) hexagon.setFill(new Color( 0.0, 0.9, 0.0, 0.1 ));
 
+        if( contains == LAVA ) hexagon.setFill( Color.RED );
+        if( contains == BLOCK ) hexagon.setFill( Color.GRAY );
     }
 
     public void draw(  ) {
@@ -91,6 +110,8 @@ public class Cell extends Parent {
                 game.setSelect( idx, idy );
             }
         });
+
+        //hexagon.setri
 
 
         root.getChildren().addAll( hexagon );
