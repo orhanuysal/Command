@@ -3,11 +3,9 @@ package sample;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
-import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.util.Pair;
 
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.io.FileNotFoundException;
 
@@ -18,21 +16,31 @@ public class Game extends Page {
     private Group pen;
     private final int MinX = 100;
     private final int MinY = 100;
-    public static final int LENGTH = 50; // Side Lenght of a hexagon
+    public static final int LENGTH = 40; // Side Lenght of a hexagon
     private final double H = Math.sqrt( 3 )*LENGTH/2; // Height of a hexagon
     private final int rows = 10;
     private final int columns = 10;
 
-    private Image lava = new Image(new FileInputStream("src\\assets\\lava.png"));
-
-    private Cell selectedCell;
+    public int selectedX;
+    public int selectedY;
 
     private Pawn[] pawns;
 
     private Cell[][] cells;
 
-    public Game(GridPane root) throws FileNotFoundException {
-        selectedCell = null;
+    public void setSelect( int x, int y ) {
+
+        selectedX = x;
+        selectedY = y;
+        for(int i=0;i<rows;i++)
+            for(int j=0;j<columns;j++) {
+                if( i == selectedX && j == selectedY ) cells[i][j].setState( 1 );
+                else cells[i][j].setState( 0 );
+            }
+    }
+
+    public Game(GridPane root) {
+
         this.root = root;
         pen = new Group();
         root.add( pen, 0, 0 );
@@ -48,7 +56,6 @@ public class Game extends Page {
 
         try {
             Pawn p = new Pawn(cells[9][9], 0);
-
             p.draw(pen);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -57,7 +64,7 @@ public class Game extends Page {
 
     private ArrayList<Pair<Integer,Integer>> getPlayer1Pawns() {
         ArrayList<Pair<Integer,Integer>> pawns = new ArrayList<>();
-
+        // doldur
         return pawns;
     }
 
