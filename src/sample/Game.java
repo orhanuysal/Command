@@ -29,8 +29,21 @@ public class Game extends Page {
         cells = new Cell[rows][columns];
 
         createComponents();
-
+        createRelations(  );
         draw();
+    }
+
+    private void createRelations() {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                if( i+1 < rows ) connect( cells[i][j], cells[i][j+1], 0 );
+            }
+        }
+    }
+
+    private void connect(Cell a, Cell b, int num) {
+        a.addAdj( num, b );
+        b.addAdj( num+3, a );
     }
 
     private void createComponents() {

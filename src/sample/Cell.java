@@ -8,14 +8,39 @@ import javafx.scene.effect.Light;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polyline;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class Cell extends Parent {
     public double x, y;
     public Group root;
 
+    public final int EMPTY = 0;
+    public final int PAWN = 1;
+    public final int PAWN2 = 2;
+    public final int LAVA = 3;
+    public final int BLOCK = 4;
+
+    public int contains = 0;
+
+    public HashMap< Integer, Cell > adj;
+
     public Cell(double x, double y, Group root) {
+        adj = new HashMap<>();
         this.root = root;
         this.x = x;
         this.y = y;
+    }
+
+    void addAdj( int x, Cell c ) {
+        adj.put( x, c );
+    }
+
+    public double getX() {
+        return x;
+    }
+    public double getY() {
+        return y;
     }
 
     public class X extends Parent {
@@ -34,9 +59,18 @@ public class Cell extends Parent {
             theta += Math.PI / 3;
         }
 
-        hexagon.setFill(Color.AQUA);
+
+        if( contains == EMPTY ) hexagon.setFill(Color.WHITE);
+        if( contains == PAWN ) hexagon.setFill(Color.WHEAT);
+        if( contains == PAWN2 ) hexagon.setFill(Color.DARKGRAY);
+        if( contains == LAVA ) hexagon.setFill(Color.AZURE);
+        if( contains == BLOCK ) hexagon.setFill(Color.BLACK);
+
         hexagon.setStroke(Color.BLACK);
 
         root.getChildren().addAll( hexagon );
     }
+
+
+
 }
