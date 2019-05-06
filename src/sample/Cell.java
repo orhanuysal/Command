@@ -52,12 +52,6 @@ public class Cell extends Parent {
         return y;
     }
 
-    public class X extends Parent {
-        public ObservableList<Node> getChildren() {
-            return super.getChildren();
-        }
-    }
-
     void setState( int val ) {
         isSelected = val;
 
@@ -84,12 +78,9 @@ public class Cell extends Parent {
         hexagon.setFill( Color.BROWN );
         hexagon.setStroke( Color.BLACK );
 
-        hexagon.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                System.out.printf( "Clicked!! %d %d\n", idx, idy );
-                game.setSelect( idx, idy );
-            }
+        hexagon.setOnMouseClicked(event -> {
+            System.out.printf( "Clicked!! %d %d\n", idx, idy );
+            game.setSelect( idx, idy );
         });
 
 

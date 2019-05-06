@@ -20,23 +20,29 @@ public class Game extends Page {
     private final double H = Math.sqrt( 3 )*LENGTH/2; // Height of a hexagon
     private final int rows = 10;
     private final int columns = 10;
+    private int turn;
+    private int stage;
+    private Player p0, p1;
 
     public int selectedX;
     public int selectedY;
+    public Cell selected;
 
     private Pawn[] pawns;
 
     private Cell[][] cells;
 
-    public void setSelect( int x, int y ) {
+    public Cell setSelect( int x, int y ) {
 
         selectedX = x;
         selectedY = y;
+        selected = cells[selectedX][selectedY];
         for(int i=0;i<rows;i++)
             for(int j=0;j<columns;j++) {
                 if( i == selectedX && j == selectedY ) cells[i][j].setState( 1 );
                 else cells[i][j].setState( 0 );
             }
+        return selected;
     }
 
     public Game(GridPane root) {
@@ -46,23 +52,23 @@ public class Game extends Page {
         root.add( pen, 0, 0 );
 
         cells = new Cell[rows][columns];
+        turn = 0;
+        stage = 0;
 
-        addButtons();
 
-        createPawns( getPlayer1Pawns(), getPlayer2Pawns() );
+        //addButtons();
+
+        //createPawns( getPlayer1Pawns(), getPlayer2Pawns() );
         createComponents();
-        createRelations(  );
+        createRelations();
         draw();
 
-        try {
-            Pawn p = new Pawn(cells[9][9], 0);
-            p.draw(pen);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        p0 = new Player();
+        p1 = new Player();
+        handleStage0();
     }
 
-    private ArrayList<Pair<Integer,Integer>> getPlayer1Pawns() {
+    /*private ArrayList<Pair<Integer,Integer>> getPlayer1Pawns() {
         ArrayList<Pair<Integer,Integer>> pawns = new ArrayList<>();
         // doldur
         return pawns;
@@ -72,7 +78,7 @@ public class Game extends Page {
         ArrayList<Pair<Integer,Integer>> pawns = new ArrayList<>();
         // doldur
         return pawns;
-    }
+    }*/
 
     private void createPawns(ArrayList<Pair<Integer,Integer>> locs, ArrayList<Pair<Integer,Integer>> locs2 ) {
 
@@ -118,7 +124,40 @@ public class Game extends Page {
 
     }
 
+    private void handleStage0(){
 
+        Button placePawn = createButon("Place Pawn", 40, event -> {
+            if(turn == 0 && p0.pawnsToPlace != 0){
+                try {
+                    Pawn p = new Pawn(selected, 0);
+                    p.draw(pen);
+                    p0.pawnsToPlace--;
+                    turn = 1;
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+            else if(turn == 1 && p1.pawnsToPlace != 0){
+                try {
+                    Pawn p = new Pawn(selected, 1);
+                    p.draw(pen);
+                    p1.pawnsToPlace--;
+                    turn = 0;
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+            else{
+                System.out.println("Stage0 completed");
+                handleStage1();
+            }
+        });
+        pen.getChildren().add(placePawn);
+    }
+
+    private void handleStage1() {
+
+    }
 
     private void createRelations() {
         for (int i = 0; i < rows; i++) {
