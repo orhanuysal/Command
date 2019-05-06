@@ -3,9 +3,11 @@ package sample;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.util.Pair;
 
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.io.FileNotFoundException;
 
@@ -21,13 +23,15 @@ public class Game extends Page {
     private final int rows = 10;
     private final int columns = 10;
 
+    private Image lava = new Image(new FileInputStream("src\\assets\\lava.png"));
+
     private Cell selectedCell;
 
     private Pawn[] pawns;
 
     private Cell[][] cells;
 
-    public Game(GridPane root) {
+    public Game(GridPane root) throws FileNotFoundException {
         selectedCell = null;
         this.root = root;
         pen = new Group();
@@ -44,6 +48,7 @@ public class Game extends Page {
 
         try {
             Pawn p = new Pawn(cells[9][9], 0);
+
             p.draw(pen);
         } catch (FileNotFoundException e) {
             e.printStackTrace();

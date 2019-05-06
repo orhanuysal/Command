@@ -17,8 +17,8 @@ public class Pawn {
     public int direction = 0;
     public int team;
     public ImageView pawnImage;
-    private Image bluerobot = new Image(new FileInputStream("C:\\Users\\alper\\IdeaProjects\\Command\\src\\assets\\bluerobot.png"));
-    private Image redrobot = new Image(new FileInputStream("C:\\Users\\alper\\IdeaProjects\\Command\\src\\assets\\redrobot.png"));
+    private Image bluerobot = new Image(new FileInputStream("src\\assets\\bluerobot.png"));
+    private Image redrobot = new Image(new FileInputStream("src\\assets\\redrobot.png"));
     private double height;
     private double width;
 

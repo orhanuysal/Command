@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.effect.Light;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Polyline;
 
 import java.util.ArrayList;
@@ -43,14 +44,8 @@ public class Cell extends Parent {
         return y;
     }
 
-    public class X extends Parent {
-        public ObservableList<Node> getChildren() {
-            return super.getChildren();
-        }
-    }
-
     public void draw(  ) {
-        Polyline hexagon = new Polyline();
+        Polygon hexagon = new Polygon();
 
         double theta = 0;
         for(int i=0;i<=6;i++) {
@@ -70,7 +65,4 @@ public class Cell extends Parent {
 
         root.getChildren().addAll( hexagon );
     }
-
-
-
 }
