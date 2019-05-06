@@ -16,7 +16,7 @@ public class Game extends Page {
     private Group pen;
     private final int MinX = 100;
     private final int MinY = 100;
-    public static final int LENGTH = 20; // Side Lenght of a hexagon
+    public static final int LENGTH = 50; // Side Lenght of a hexagon
     private final double H = Math.sqrt( 3 )*LENGTH/2; // Height of a hexagon
     private final int rows = 10;
     private final int columns = 10;
@@ -52,7 +52,7 @@ public class Game extends Page {
 
     private ArrayList<Pair<Integer,Integer>> getPlayer1Pawns() {
         ArrayList<Pair<Integer,Integer>> pawns = new ArrayList<>();
-        // doldur
+
         return pawns;
     }
 
@@ -142,4 +142,5 @@ public class Game extends Page {
             }
         }
     }
+
 }

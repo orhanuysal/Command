@@ -1,8 +1,10 @@
 package sample;
 
+import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 
@@ -44,7 +46,16 @@ public class Pawn {
 
         pawnImage.setLayoutX(x);
         pawnImage.setLayoutY(y);
-        //pawnImage.addEventHandler(MouseEvent.);
+        pawnImage.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if(event.getButton() == MouseButton.SECONDARY){
+                rotate();
+            }
+        });
         pen.getChildren().addAll(pawnImage);
+    }
+
+    public void rotate(){
+        direction++;
+        pawnImage.setRotate(direction*60);
     }
 }
