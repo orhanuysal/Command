@@ -7,12 +7,14 @@ import javafx.scene.layout.GridPane;
 import javafx.util.Pair;
 
 import java.util.ArrayList;
+import java.io.FileNotFoundException;
+
 
 public class Game extends Page {
 
 
     private Group pen;
-    private final int MinX = 150;
+    private final int MinX = 100;
     private final int MinY = 100;
     public static final int LENGTH = 20; // Side Lenght of a hexagon
     private final double H = Math.sqrt( 3 )*LENGTH/2; // Height of a hexagon
@@ -39,6 +41,13 @@ public class Game extends Page {
         createComponents();
         createRelations(  );
         draw();
+
+        try {
+            Pawn p = new Pawn(cells[9][9], 0);
+            p.draw(pen);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     private ArrayList<Pair<Integer,Integer>> getPlayer1Pawns() {
