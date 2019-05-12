@@ -101,10 +101,6 @@ public class Cell extends Parent {
             System.out.printf( "Clicked!! %d %d\n", idx, idy );
             clicked();
         });
-
-        //hexagon.setri
-
-
         root.getChildren().addAll( hexagon );
     }
 

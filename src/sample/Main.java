@@ -16,7 +16,7 @@ public class Main extends Application {
         System.out.println("Start!!!\n");
         Game game = new Game( root );
 
-        primaryStage.setScene(new Scene(root, primaryStage.getWidth(), primaryStage.getHeight()));
+        primaryStage.setScene(new Scene(root, game.sceneWidth, game.sceneHeight));
         //primaryStage.setFullScreen(true);
 
 

@@ -10,11 +10,13 @@ import javafx.scene.layout.GridPane;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 public class Pawn {
 
     public Cell c;
-    public int direction = 2;
+    private ArrayList<Move> moves;
+    public int direction;
     public int team;
     public ImageView pawnImage;
     private Image bluerobot = new Image(new FileInputStream("src//assets//bluerobot.png"));
@@ -27,10 +29,25 @@ public class Pawn {
         direction = 2;
         this.team = team;
         c.contains = team+1;
+        moves = new ArrayList<>();
+    }
+
+    public void addMove(Move.type type){
+        moves.add(new Move(type));
+    }
+
+    public void executeMoves(){
+        for (Move m: moves){
+            m.executeMove();
+            System.out.println("Move " + m.getType());
+        }
+        moves.clear();
     }
 
     public void relocate( Cell ccc ) {
-        this.c.contains = 0;
+        if (this.c.contains == Cell.PAWN ) {
+            this.c.contains = 0;
+        }
         this.c = ccc;
         c.contains = team+1;
 
