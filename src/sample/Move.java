@@ -40,6 +40,10 @@ public class Move {
         return type;
     }
 
+    public boolean equals(Move obj) {
+        return obj.type == this.type;
+    }
+
     @Override
     public String toString(){
         return type.name();

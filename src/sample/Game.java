@@ -1,5 +1,7 @@
 package sample;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
@@ -7,6 +9,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.GridPane;
@@ -43,6 +46,9 @@ public class Game extends Page {
     private int spell;
     private boolean debug = false;
     private Button placePawn, guardB, burnB, speedB, rotateB, redirectB, rangeB, portalB, finishTurnB;
+    private ComboBox<Integer> comboBox;
+    private HashMap<Move.type, Integer> moveCounts;
+    private int rotationVal;
     private double btny = 40;
 
     public Game(GridPane root) {
@@ -117,8 +123,20 @@ public class Game extends Page {
             proceed();
         });
 
+        comboBox = new ComboBox<>();
+        comboBox.getItems().addAll(1, 2, 3, 4, 5, 6);
+        comboBox.setVisible(false);
+        comboBox.setMaxWidth(30);
+        comboBox.valueProperty().addListener(new ChangeListener<Integer>() {
+            @Override
+            public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+                rotationVal = newValue;
+            }
+        });
 
-        pen.getChildren().addAll(guardB, burnB, speedB, rotateB, redirectB, rangeB, portalB);
+        pen.getChildren().addAll(guardB, burnB, speedB, rotateB, redirectB, rangeB, portalB, comboBox);
+        //root.setMinWidth(1800);
+        //System.out.println("penx: " + pen.getLayoutX() + "rootx: " + root.getMinWidth());
     }
 
     public Cell setSelect( int x, int y ) {
@@ -154,8 +172,31 @@ public class Game extends Page {
 
     private void showButton(Button btn){
         btn.setLayoutY(btny);
+        btn.setLayoutX(45);
+        btn.setDisable(false);
         btny += HEIGHT + 10;
         btn.setVisible(true);
+    }
+
+    private void fillMoveCount(ArrayList<Move> buttonsToShow){
+        moveCounts = new HashMap<>();
+        moveCounts.put(Move.type.REDIRECT, getFreq(buttonsToShow, Move.type.REDIRECT));
+        moveCounts.put(Move.type.BURN, getFreq(buttonsToShow, Move.type.BURN));
+        moveCounts.put(Move.type.GUARD, getFreq(buttonsToShow, Move.type.GUARD));
+        moveCounts.put(Move.type.PORTAL, getFreq(buttonsToShow, Move.type.PORTAL));
+        moveCounts.put(Move.type.RANGE, getFreq(buttonsToShow, Move.type.RANGE));
+        moveCounts.put(Move.type.ROTATE, getFreq(buttonsToShow, Move.type.ROTATE));
+        moveCounts.put(Move.type.SPEED, getFreq(buttonsToShow, Move.type.SPEED));
+    }
+
+    private int getFreq(ArrayList<Move> buttonsToShow, Move.type t){
+        int res = 0;
+        for(Move m : buttonsToShow){
+            if(m.getType() == t){
+                res++;
+            }
+        }
+        return res;
     }
 
     private void addButtons() {
@@ -166,10 +207,15 @@ public class Game extends Page {
         showButton(finishTurnB);
 
         ArrayList<Move> buttonsToShow = currentPlayer.getPossibleMoves();
+        fillMoveCount(buttonsToShow);
+
+
         for (Move bts : buttonsToShow){
             switch (bts.getType()){
                 case REDIRECT:
                     showButton(redirectB);
+                    comboBox.setLayoutY(redirectB.getLayoutY());
+                    comboBox.setVisible(true);
                     break;
                 case GUARD:
                     showButton(guardB);
@@ -193,93 +239,139 @@ public class Game extends Page {
                     System.out.println("button type: " + bts.getType());
             }
         }
-
-        /*pen.getChildren().addAll(   createButon("Guard", 40, event -> {guard();}),
-                                    createButon("Burn", 80, event -> {burn();}),
-                                    createButon("Speed", 120, event -> {speed();}),
-                                    createButon("Portal", 160, event -> {portal();}),
-                                    createButon("Rotate", 200, event -> {rotate();}),
-                                    createButon("Range", 240, event -> {range();}),
-                                    createButon("Finish turn", 280, event -> {proceed();})
-        );*/
     }
 
     private void redirect(){
+        Player currentPlayer = (turn == 0) ? p0 : p1;
+        System.out.println(moveCounts.values());
+        if (moveCounts.get(Move.type.REDIRECT) > 0) {
+            for (Pawn p : currentPlayer.pawns) {
+                if (p.c == selected) {
+                    for (int i = 0; i < rotationVal; i++){
+                        p.rotate();
+                    }
+                }
+            }
+            moveCounts.put(Move.type.REDIRECT, moveCounts.get(Move.type.REDIRECT)-1);
+            if(moveCounts.get(Move.type.REDIRECT) == 0){
+                redirectB.setDisable(true);
+            }
+        }
         System.out.println("On Redirect!!");
     }
 
     private void guard() {
         System.out.println("On Guard!!");
-        int p = Cell.PAWN;
-        if( turn == 1 ) p = Cell.PAWN2;
-        if( debug || selected.contains == p ) {
+        if (moveCounts.get(Move.type.GUARD) > 0) {
+            int p = Cell.PAWN;
+            if( turn == 1 ) p = Cell.PAWN2;
+            if( debug || selected.contains == p ) {
 
-            for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
-                if( c.getValue().contains == Cell.EMPTY )
-                    c.getValue(  ).setIsPossible( 1 );
+                for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
+                    if( c.getValue().contains == Cell.EMPTY )
+                        c.getValue(  ).setIsPossible( 1 );
 
-            spell = Cell.BLOCK;
+                spell = Cell.BLOCK;
+            }
+            moveCounts.put(Move.type.GUARD, moveCounts.get(Move.type.GUARD)-1);
+            if(moveCounts.get(Move.type.GUARD) == 0){
+                guardB.setDisable(true);
+            }
         }
     }
 
     private void burn() {
         System.out.println("On Burn!!");
-        int p = Cell.PAWN;
-        if( turn == 1 ) p = Cell.PAWN2;
-        if( debug || selected.contains == p ) {
-            for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
-                if( c.getValue().contains == Cell.EMPTY )
-                    c.getValue(  ).setIsPossible( 1 );
+        if (moveCounts.get(Move.type.BURN) > 0) {
+            int p = Cell.PAWN;
+            if( turn == 1 ) p = Cell.PAWN2;
+            if( debug || selected.contains == p ) {
+                for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
+                    if( c.getValue().contains == Cell.EMPTY )
+                        c.getValue(  ).setIsPossible( 1 );
 
-            spell = Cell.LAVA;
+                spell = Cell.LAVA;
+            }
+            moveCounts.put(Move.type.BURN, moveCounts.get(Move.type.BURN)-1);
+            if(moveCounts.get(Move.type.BURN) == 0){
+                burnB.setDisable(true);
+            }
         }
     }
 
     private void speed() {
         System.out.println("On Speed!!");
-        int p = Cell.PAWN;
-        if( turn == 1 ) p = Cell.PAWN2;
+        if (moveCounts.get(Move.type.SPEED) > 0) {
+            int p = Cell.PAWN;
+            if( turn == 1 ) p = Cell.PAWN2;
 
-        if (debug || selected.contains == p) {
+            if (debug || selected.contains == p) {
 
+            }
+            moveCounts.put(Move.type.SPEED, moveCounts.get(Move.type.SPEED)-1);
+            if(moveCounts.get(Move.type.SPEED) == 0){
+                speedB.setDisable(true);
+            }
         }
     }
 
     private void portal() {
         System.out.println("On Portal!!");
-        Cell selected = cells[selectedX][selectedY];
-        int p = Cell.PAWN;
-        if( turn == 1 ) p = Cell.PAWN2;
+        if (moveCounts.get(Move.type.PORTAL) > 0) {
+            Cell selected = cells[selectedX][selectedY];
+            int p = Cell.PAWN;
+            if( turn == 1 ) p = Cell.PAWN2;
 
-        if (debug || selected.contains == p) {
+            if (debug || selected.contains == p) {
 
+            }
+            moveCounts.put(Move.type.PORTAL, moveCounts.get(Move.type.PORTAL)-1);
+            if(moveCounts.get(Move.type.PORTAL) == 0){
+                portalB.setDisable(true);
+            }
         }
     }
 
     private void rotate() {
         System.out.println("On Rotate!!");
-        int p = Cell.PAWN;
-        if( turn == 1 ) p = Cell.PAWN2;
+        if (moveCounts.get(Move.type.PORTAL) > 0) {
+            int p = Cell.PAWN;
+            if( turn == 1 ) p = Cell.PAWN2;
 
-        if (debug || selected.contains == p) {
-            if( selected.adj.size() == 6 ) {
-                ArrayList<Integer> hold = new ArrayList<>();
-                int beg = -1;
-                for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() ) {
-                    if( beg == -1 ) beg = c.getValue().contains;
-                    else hold.add(c.getValue().contains);
+            if (debug || selected.contains == p) {
+                if( selected.adj.size() == 6 ) {
+                    ArrayList<Integer> hold = new ArrayList<>();
+                    int beg = -1;
+                    for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() ) {
+                        if( beg == -1 ) beg = c.getValue().contains;
+                        else hold.add(c.getValue().contains);
+                    }
+                    hold.add( beg );
+                    beg = 0;
+                    for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
+                        c.getValue().setContains( hold.get( beg++ ) );
+
                 }
-                hold.add( beg );
-                beg = 0;
-                for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
-                    c.getValue().setContains( hold.get( beg++ ) );
-
+            }
+            moveCounts.put(Move.type.ROTATE, moveCounts.get(Move.type.ROTATE)-1);
+            if(moveCounts.get(Move.type.ROTATE) == 0){
+                rotateB.setDisable(true);
             }
         }
     }
 
     private void range() {
         System.out.println("On Range!!");
+        if(moveCounts.get(Move.type.RANGE) > 0){
+
+
+
+
+            moveCounts.put(Move.type.RANGE, moveCounts.get(Move.type.RANGE)-1);
+            if(moveCounts.get(Move.type.RANGE) == 0){
+                rangeB.setDisable(true);
+            }
+        }
     }
 
     private void proceed() {
@@ -412,7 +504,7 @@ public class Game extends Page {
                 double x = MinX + 1.5*LENGTH*j;
                 double y = MinY + 2*H*i;
                 if( j%2 == 1 ) y -= H;
-                cells[i][j] = new Cell( x, y, i, j, pen, this );
+                cells[i][j] = new Cell( x+90, y+50, i, j, pen, this );
             }
         }
     }
