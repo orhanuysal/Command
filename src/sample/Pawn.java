@@ -28,7 +28,7 @@ public class Pawn {
         this.c = c;
         direction = 2;
         this.team = team;
-        c.contains = team+1;
+        c.setContains( team+1 );
         moves = new ArrayList<>();
     }
 
@@ -45,11 +45,11 @@ public class Pawn {
     }
 
     public void relocate( Cell ccc ) {
-        if (this.c.contains == Cell.PAWN ) {
-            this.c.contains = 0;
+        if (this.c.contains == Cell.PAWN  || c.contains == Cell.PAWN2) {
+            this.c.setContains(0);
         }
         this.c = ccc;
-        c.contains = team+1;
+        c.setContains( team+1 );
 
         double x = c.getX() - width/2;
         double y = c.getY() - height/2;
@@ -89,6 +89,6 @@ public class Pawn {
     public void rotate(){
         direction++;
         direction %= 6;
-        pawnImage.setRotate(direction*60-120);
+        pawnImage.setRotate(direction*60-90);
     }
 }

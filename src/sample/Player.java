@@ -62,7 +62,7 @@ public class Player {
             }
         }
         System.out.println( "Size2: " + pawns.size() );
-        nex.contains = 0;
+        nex.setContains(0);
 
     }
 
