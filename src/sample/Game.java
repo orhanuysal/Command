@@ -3,9 +3,11 @@ package sample;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.util.Pair;
 
+import javax.swing.plaf.LabelUI;
 import javax.swing.plaf.synth.SynthEditorPaneUI;
 import java.util.ArrayList;
 import java.io.FileNotFoundException;
@@ -21,8 +23,8 @@ public class Game extends Page {
     private final int MinY = 100;
     public static final int LENGTH = 40; // Side Lenght of a hexagon
     private final double H = Math.sqrt( 3 )*LENGTH/2; // Height of a hexagon
-    private final int rows = 10;
-    private final int columns = 10;
+    private final int rows = 8;
+    private final int columns = 8;
     private int stage;
     private Player p0, p1;
 
@@ -36,6 +38,7 @@ public class Game extends Page {
     private int spell;
     private boolean debug = false;
     private Button placePawn;
+    private Label lbl;
 
     public Cell setSelect( int x, int y ) {
 
@@ -70,6 +73,11 @@ public class Game extends Page {
         turn = 0;
         stage = 0;
 
+
+        lbl = new Label( "Turn: Red" );
+        lbl.setLayoutX(60);
+        lbl.setLayoutY(400);
+
         //addButtons();
 
         //addButtons();
@@ -91,7 +99,8 @@ public class Game extends Page {
                                     createButon("Portal", 160, event -> {portal();}),
                                     createButon("Rotate", 200, event -> {rotate();}),
                                     createButon("Range", 240, event -> {range();}),
-                                    createButon("Finsih turn", 280, event -> {proceed();})
+                                    createButon("Finsih turn", 280, event -> {proceed();}),
+                                    lbl
         );
     }
 
@@ -191,16 +200,22 @@ public class Game extends Page {
                 if( nex.contains == (turn^1)+1 ) {
                     en.erase( nex );
                 } else if( nex.contains == Cell.LAVA ) {
-                    p.relocate( nex );
-                    pl.erase( nex );
+                    pl.erase( p.c );
                     i--;
+
                 }
-                if( p != null ) p.relocate( nex );
+                if( nex.contains != Cell.LAVA ) {
+                    System.out.println( nex.contains );
+                    p.relocate( nex );
+
+                }
             }
         }
 
 
         turn ^= 1;
+        if( turn == 0 ) lbl.setText( "Turn: Red" );
+        else lbl.setText( "Turn: Blue" );
     }
 
 
@@ -240,9 +255,15 @@ public class Game extends Page {
                     }
             }
             if(p1.pawnsToPlace != 0) checkPlaces();
+
+             if( turn == 0 ) lbl.setText( "Turn: Red" );
+             else lbl.setText( "Turn: Blue" );
         });
         pen.getChildren().add(placePawn);
         checkPlaces();
+
+        if( turn == 0 ) lbl.setText( "Turn: Red" );
+        else lbl.setText( "Turn: Blue" );
     }
 
     public void clear() {

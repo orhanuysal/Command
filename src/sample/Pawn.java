@@ -26,13 +26,13 @@ public class Pawn {
         this.c = c;
         direction = 2;
         this.team = team;
-        c.contains = team+1;
+        c.setContains( team+1 );
     }
 
     public void relocate( Cell ccc ) {
-        this.c.contains = 0;
+        this.c.setContains( 0 );
         this.c = ccc;
-        c.contains = team+1;
+        c.setContains( team+1 );
 
         double x = c.getX() - width/2;
         double y = c.getY() - height/2;

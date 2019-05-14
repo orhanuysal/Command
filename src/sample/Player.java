@@ -11,7 +11,7 @@ public class Player {
     Player(){
         coords = new ArrayList<>();
         pawns = new ArrayList<>();
-        pawnsToPlace = 3;
+        pawnsToPlace = 5;
     }
 
     public void addPawn( Pawn pawn ){
@@ -33,7 +33,7 @@ public class Player {
             }
         }
         System.out.println( "Size2: " + pawns.size() );
-        nex.contains = 0;
+        nex.setContains(0);
 
     }
 }
