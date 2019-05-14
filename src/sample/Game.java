@@ -8,8 +8,10 @@ import javafx.event.EventType;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.GridPane;
@@ -29,8 +31,8 @@ public class Game extends Page {
     private final int MinY = 100;
     public static final int LENGTH = 50; // Side Lenght of a hexagon
     private final double H = Math.sqrt( 3 )*LENGTH/2; // Height of a hexagon
-    private final int rows = 8;
-    private final int columns = 20;
+    private final int rows = 9;
+    private final int columns = 12;
     private int stage;
     private Player p0, p1;
 
@@ -46,6 +48,7 @@ public class Game extends Page {
     private int spell;
     private boolean debug = false;
     private Button placePawn, guardB, burnB, speedB, rotateB, redirectB, rangeB, portalB, finishTurnB;
+    private Label guardL, burnL, speedL, rotateL, redirectL, rangeL, portalL, placePawnL, p1Health, p2Health;
     private ComboBox<Integer> comboBox;
     private HashMap<Move.type, Integer> moveCounts;
     private int rotationVal;
@@ -63,14 +66,15 @@ public class Game extends Page {
         cells = new Cell[rows][columns];
         turn = 0;
         stage = 0;
+        p0 = new Player();
+        p1 = new Player();
 
         createComponents();
         createRelations();
         draw();
         initButtons();
+        drawBases();
 
-        p0 = new Player();
-        p1 = new Player();
         handleStage0();
     }
 
@@ -80,42 +84,57 @@ public class Game extends Page {
         guardB.setOnAction(event -> {
             guard();
         });
+        guardL = new Label();
+        guardL.setVisible(false);
 
         burnB = new Button("Burn");
         burnB.setVisible(false);
         burnB.setOnAction(event -> {
             burn();
         });
+        burnL = new Label();
+        burnL.setVisible(false);
+
 
         speedB = new Button("Speed");
         speedB.setVisible(false);
         speedB.setOnAction(event -> {
             speed();
         });
+        speedL = new Label();
+        speedL.setVisible(false);
 
         rotateB = new Button("Rotate");
         rotateB.setVisible(false);
         rotateB.setOnAction(event -> {
             rotate();
         });
+        rotateL = new Label();
+        rotateL.setVisible(false);
 
         redirectB = new Button("Redirect");
         redirectB.setVisible(false);
         redirectB.setOnAction(event -> {
             redirect();
         });
+        redirectL = new Label();
+        redirectL.setVisible(false);
 
         rangeB = new Button("Range");
         rangeB.setVisible(false);
         rangeB.setOnAction(event -> {
             range();
         });
+        rangeL = new Label();
+        rangeL.setVisible(false);
 
         portalB = new Button("Portal");
         portalB.setVisible(false);
         portalB.setOnAction(event -> {
             portal();
         });
+        portalL = new Label();
+        portalL.setVisible(false);
 
         finishTurnB = new Button("Finish Turn");
         finishTurnB.setVisible(false);
@@ -134,7 +153,17 @@ public class Game extends Page {
             }
         });
 
-        pen.getChildren().addAll(guardB, burnB, speedB, rotateB, redirectB, rangeB, portalB, comboBox);
+        p1Health = new Label();
+        p2Health = new Label();
+
+        p1Health.setLayoutY(500);
+        p1Health.setText("Red base health: " + p0.base.health);
+
+        p2Health.setLayoutY(550);
+        p2Health.setText("Blue base health: " + p1.base.health);
+
+        pen.getChildren().addAll(guardB, burnB, speedB, rotateB, redirectB, rangeB, portalB, comboBox,
+                guardL, burnL, speedL, rotateL, redirectL, rangeL, portalL, p1Health, p2Health);
         //root.setMinWidth(1800);
         //System.out.println("penx: " + pen.getLayoutX() + "rootx: " + root.getMinWidth());
     }
@@ -170,12 +199,20 @@ public class Game extends Page {
         }
     }
 
-    private void showButton(Button btn){
-        btn.setLayoutY(btny);
-        btn.setLayoutX(45);
+    private void clearLabels(){
+        for(Node node : pen.getChildren()){
+            if(node.getClass() == guardL.getClass()){
+                node.setVisible(false);
+            }
+        }
+    }
+
+    private void showButton(Button btn, Label lbl){
+        btn.setLayoutY(btny); lbl.setLayoutY(btny);
+        btn.setLayoutX(45); lbl.setLayoutX(btn.getLayoutX() + btn.getWidth());
         btn.setDisable(false);
         btny += HEIGHT + 10;
-        btn.setVisible(true);
+        btn.setVisible(true); lbl.setVisible(true);
     }
 
     private void fillMoveCount(ArrayList<Move> buttonsToShow){
@@ -199,41 +236,52 @@ public class Game extends Page {
         return res;
     }
 
+    private void fillLabels(){
+        redirectL.setText("" + moveCounts.get(Move.type.REDIRECT));
+        burnL.setText("" + moveCounts.get(Move.type.BURN));
+        guardL.setText("" + moveCounts.get(Move.type.GUARD));
+        portalL.setText("" + moveCounts.get(Move.type.PORTAL));
+        rangeL.setText("" + moveCounts.get(Move.type.RANGE));
+        rotateL.setText("" + moveCounts.get(Move.type.ROTATE));
+        speedL.setText("" + moveCounts.get(Move.type.SPEED));
+    }
+
     private void addButtons() {
         Player currentPlayer = (turn == 0) ? p0 : p1;
         System.out.println("Turn: " + turn);
 
         clearButtons();
-        showButton(finishTurnB);
+        clearLabels();
+        showButton(finishTurnB, new Label());
 
         ArrayList<Move> buttonsToShow = currentPlayer.getPossibleMoves();
         fillMoveCount(buttonsToShow);
-
+        fillLabels();
 
         for (Move bts : buttonsToShow){
             switch (bts.getType()){
                 case REDIRECT:
-                    showButton(redirectB);
+                    showButton(redirectB, redirectL);
                     comboBox.setLayoutY(redirectB.getLayoutY());
                     comboBox.setVisible(true);
                     break;
                 case GUARD:
-                    showButton(guardB);
+                    showButton(guardB, guardL);
                     break;
                 case BURN:
-                    showButton(burnB);
+                    showButton(burnB, burnL);
                     break;
                 case SPEED:
-                    showButton(speedB);
+                    showButton(speedB, speedL);
                     break;
                 case PORTAL:
-                    showButton(portalB);
+                    showButton(portalB, portalL);
                     break;
                 case ROTATE:
-                    showButton(rotateB);
+                    showButton(rotateB, rotateL);
                     break;
                 case RANGE:
-                    showButton(rangeB);
+                    showButton(rangeB, rangeL);
                     break;
                 default:
                     System.out.println("button type: " + bts.getType());
@@ -257,6 +305,7 @@ public class Game extends Page {
                 redirectB.setDisable(true);
             }
         }
+        fillLabels();
         System.out.println("On Redirect!!");
     }
 
@@ -278,6 +327,7 @@ public class Game extends Page {
                 guardB.setDisable(true);
             }
         }
+        fillLabels();
     }
 
     private void burn() {
@@ -297,6 +347,7 @@ public class Game extends Page {
                 burnB.setDisable(true);
             }
         }
+        fillLabels();
     }
 
     private void speed() {
@@ -313,6 +364,7 @@ public class Game extends Page {
                 speedB.setDisable(true);
             }
         }
+        fillLabels();
     }
 
     private void portal() {
@@ -330,6 +382,7 @@ public class Game extends Page {
                 portalB.setDisable(true);
             }
         }
+        fillLabels();
     }
 
     private void rotate() {
@@ -358,20 +411,18 @@ public class Game extends Page {
                 rotateB.setDisable(true);
             }
         }
+        fillLabels();
     }
 
     private void range() {
         System.out.println("On Range!!");
         if(moveCounts.get(Move.type.RANGE) > 0){
-
-
-
-
             moveCounts.put(Move.type.RANGE, moveCounts.get(Move.type.RANGE)-1);
             if(moveCounts.get(Move.type.RANGE) == 0){
                 rangeB.setDisable(true);
             }
         }
+        fillLabels();
     }
 
     private void proceed() {
@@ -391,16 +442,32 @@ public class Game extends Page {
             if( nex != null && nex.contains != Cell.BLOCK && nex.contains != ownPawn ) {
                 if( nex.contains == (turn^1)+1 ) {
                     en.erase( nex );
-                } else if( nex.contains == Cell.LAVA ) {
+                }
+                else if( nex.contains == Cell.LAVA ) {
                     p.relocate( nex );
                     pl.erase( nex );
                     i--;
+                }
+                else if( nex.contains == Cell.BASE){
+                    pl.erase(p.c);
+                    en.base.health--;
                 }
                 if( p != null ) p.relocate( nex );
             }
 
         }
+        endTurn();
         switchTurn();
+    }
+
+    private void endTurn(){
+        if(p0.base.health == 0 || p1.base.health == 0){
+            String winner = (turn == 0) ? "Red" : "Blue";
+            Alert endGame = new Alert(Alert.AlertType.INFORMATION);
+            endGame.setContentText(winner + " Won!");
+            endGame.setTitle("Game Over");
+            endGame.showAndWait();
+        }
     }
 
     private void switchTurn() {
@@ -463,12 +530,13 @@ public class Game extends Page {
                 for(int j=0;j<2;j++)
                     cells[i][j].setIsPossible(1);
         } else {
-
             clear();
             for(int i=columns-2;i<columns;i++)
                 for(int j=0;j<rows;j++)
                     cells[j][i].setIsPossible(1);
         }
+        cells[rows/2][0].setIsPossible(0);
+        cells[rows/2][columns-1].setIsPossible(0);
     }
 
     private void handleStage1() {
@@ -507,6 +575,20 @@ public class Game extends Page {
                 cells[i][j] = new Cell( x+90, y+50, i, j, pen, this );
             }
         }
+    }
+
+    private void drawBases(){
+        p0.base.shape.setLayoutX(cells[rows/2][0].x);
+        p0.base.shape.setLayoutY(cells[rows/2][0].y);
+        p1.base.shape.setLayoutX(cells[rows/2][columns-1].x);
+        p1.base.shape.setLayoutY(cells[rows/2][columns-1].y);
+        pen.getChildren().addAll(p0.base.shape, p1.base.shape);
+
+        p0.base.cell = cells[rows/2][0];
+        p1.base.cell = cells[rows/2][columns-1];
+
+        cells[rows/2][0].setContains(Cell.BASE);
+        cells[rows/2][columns-1].setContains(Cell.BASE);
     }
 
     public void draw() {

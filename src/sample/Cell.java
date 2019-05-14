@@ -25,6 +25,7 @@ public class Cell extends Parent {
     public static final int PAWN2 = 2;
     public static final int LAVA = 3;
     public static final int BLOCK = 4;
+    public static final int BASE = 5;
 
     public int contains = 0;
     public int isSelected = 0;

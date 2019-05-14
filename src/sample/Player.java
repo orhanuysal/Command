@@ -13,14 +13,17 @@ public class Player {
     private ArrayList<Move> initialMoves;
     private int moveIndex;
     private final int MOVESTOGET = 4;
+    private int count = 0;
+    public Base base;
 
     Player(){
         coords = new ArrayList<>();
         pawns = new ArrayList<>();
-        pawnsToPlace = 1;
+        pawnsToPlace = 5;
         initialMoves = new ArrayList<>();
         initializeMoves();
         moveIndex = 0;
+        base = new Base();
     }
 
     private void initializeMoves(){
@@ -70,6 +73,11 @@ public class Player {
         }
         System.out.println("Possible moves: " + Arrays.toString(res.toArray()));
         Collections.rotate(initialMoves, MOVESTOGET);
+        count++;
+        if((initialMoves.size()/MOVESTOGET) == count){
+            count = 0;
+            Collections.shuffle(initialMoves);
+        }
         return res;
     }
 }
