@@ -19,8 +19,8 @@ public class Pawn {
     public int direction;
     public int team;
     public ImageView pawnImage;
-    private Image bluerobot = new Image(new FileInputStream("src//assets//bluerobot.png"));
-    private Image redrobot = new Image(new FileInputStream("src//assets//redrobot.png"));
+    private Image bluerobot = new Image(new FileInputStream("resources//bluerobot.png"));
+    private Image redrobot = new Image(new FileInputStream("resources//redrobot.png"));
     private double height;
     private double width;
 
@@ -30,18 +30,6 @@ public class Pawn {
         this.team = team;
         c.contains = team+1;
         moves = new ArrayList<>();
-    }
-
-    public void addMove(Move.type type){
-        moves.add(new Move(type));
-    }
-
-    public void executeMoves(){
-        for (Move m: moves){
-            m.executeMove();
-            System.out.println("Move " + m.getType());
-        }
-        moves.clear();
     }
 
     public void relocate( Cell ccc ) {

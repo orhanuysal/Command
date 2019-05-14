@@ -17,24 +17,6 @@ public class Move {
         RANGE
     }
 
-    public void executeMove(){
-        switch (type) {
-            case REDIRECT:
-                break;
-            case GUARD:
-                break;
-            case BURN:
-                break;
-            case SPEED:
-                break;
-            case PORTAL:
-                break;
-            case ROTATE:
-                break;
-            case RANGE:
-                break;
-        }
-    }
 
     public type getType(){
         return type;
