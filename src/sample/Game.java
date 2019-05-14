@@ -426,7 +426,7 @@ public class Game extends Page {
     }
 
     private void proceed() {
-        System.out.println("On Proceed!!\n");
+        System.out.println("On Proceed!!, Turn : " + turn);
 
         Player pl = p0, en = p1;
         if( turn == 1 ) {pl = p1;en = p0;}
@@ -450,6 +450,7 @@ public class Game extends Page {
                 }
                 else if( nex.contains == Cell.BASE){
                     pl.erase(p.c);
+                    p = null;
                     en.base.health--;
                 }
                 if( p != null ) p.relocate( nex );
@@ -458,6 +459,10 @@ public class Game extends Page {
         }
         endTurn();
         switchTurn();
+        for(int i=0;i<rows;i++, System.out.println(""))
+            for(int j=0;j<columns;j++)
+                System.out.print( cells[i][j].contains + " " );
+
     }
 
     private void endTurn(){
@@ -467,6 +472,7 @@ public class Game extends Page {
             endGame.setContentText(winner + " Won!");
             endGame.setTitle("Game Over");
             endGame.showAndWait();
+
         }
     }
 
@@ -548,14 +554,14 @@ public class Game extends Page {
     private void createRelations() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                if( j % 2 == 0 ) {
+                if( i % 2 == 0 ) {
                     if (j + 1 < columns) connect(cells[i][j], cells[i][j + 1], 0);
-                    if (j + 1 < columns && i + 1 < rows) connect(cells[i][j], cells[i + 1][j + 1], 1);
+                    if (j + 1 < columns && i + 1 < rows) connect(cells[i][j], cells[i + 1][j+1], 1);
                     if (i + 1 < rows) connect(cells[i][j], cells[i + 1][j], 2);
                 } else {
-                    if (i > 0 && j + 1 < columns) connect(cells[i][j], cells[i-1][j + 1], 0);
-                    if (j + 1 < columns) connect(cells[i][j], cells[i][j + 1], 1);
-                    if (i + 1 < rows) connect(cells[i][j], cells[i + 1][j], 2);
+                    if (j + 1 < columns) connect(cells[i][j], cells[i][j + 1], 0);
+                    if ( i + 1 <  rows ) connect(cells[i][j], cells[i + 1][j], 1);
+                    if (j > 0) connect(cells[i][j], cells[i + 1][j - 1], 2);
                 }
             }
         }
@@ -569,9 +575,9 @@ public class Game extends Page {
     private void createComponents() {
         for(int i=0;i<rows;i++) {
             for(int j=0;j<columns;j++) {
-                double x = MinX + 1.5*LENGTH*j;
-                double y = MinY + 2*H*i;
-                if( j%2 == 1 ) y -= H;
+                double x = MinX + 2*H*j;
+                double y = MinY + 1.5*LENGTH*i;
+                if( i%2 == 1 ) x -= H;
                 cells[i][j] = new Cell( x+90, y+50, i, j, pen, this );
             }
         }

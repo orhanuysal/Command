@@ -4,6 +4,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 
@@ -22,4 +23,5 @@ public abstract class Page {
         btn.getStyleClass().add("record-sales");
         return btn;
     }
+
 }

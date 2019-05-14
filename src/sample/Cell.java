@@ -86,7 +86,7 @@ public class Cell extends Parent {
         hexagon = new Polygon();
         Polyline borders = new Polyline();
 
-        double theta = 0;
+        double theta = Math.PI / 6;
         for(int i=0;i<=6;i++) {
             hexagon.getPoints().add( x + Game.LENGTH*Math.cos( theta ) );
             hexagon.getPoints().add( y + Game.LENGTH*Math.sin( theta ) );
