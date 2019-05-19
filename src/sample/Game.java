@@ -1,10 +1,13 @@
 package sample;
 
+import com.sun.javafx.tk.FontLoader;
+import com.sun.javafx.tk.Toolkit;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -15,7 +18,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Pair;
 
 import javax.swing.plaf.synth.SynthEditorPaneUI;
@@ -46,10 +52,10 @@ public class Game extends Page {
 
     private Cell[][] cells;
     private int spell;
+    private int ownpawn;
     private boolean debug = false;
-    private Button placePawn, guardB, burnB, speedB, rotateB, redirectB, rangeB, portalB, finishTurnB;
+    private Button quickFill, placePawn, guardB, burnB, speedB, rotateB, redirectB, rangeB, portalB, finishTurnB;
     private Label guardL, burnL, speedL, rotateL, redirectL, rangeL, portalL, placePawnL, p1Health, p2Health;
-    private ComboBox<Integer> comboBox;
     private HashMap<Move.type, Integer> moveCounts;
     private int rotationVal;
     private double btny = 40;
@@ -142,28 +148,8 @@ public class Game extends Page {
             proceed();
         });
 
-        comboBox = new ComboBox<>();
-        comboBox.getItems().addAll(1, 2, 3, 4, 5, 6);
-        comboBox.setVisible(false);
-        comboBox.setMaxWidth(30);
-        comboBox.valueProperty().addListener(new ChangeListener<Integer>() {
-            @Override
-            public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
-                rotationVal = newValue;
-            }
-        });
-
-        p1Health = new Label();
-        p2Health = new Label();
-
-        p1Health.setLayoutY(500);
-        p1Health.setText("Red base health: " + p0.base.health);
-
-        p2Health.setLayoutY(550);
-        p2Health.setText("Blue base health: " + p1.base.health);
-
-        pen.getChildren().addAll(guardB, burnB, speedB, rotateB, redirectB, rangeB, portalB, comboBox,
-                guardL, burnL, speedL, rotateL, redirectL, rangeL, portalL, p1Health, p2Health);
+        pen.getChildren().addAll(guardB, burnB, speedB, rotateB, redirectB, rangeB, portalB,
+                guardL, burnL, speedL, rotateL, redirectL, rangeL, portalL);
         //root.setMinWidth(1800);
         //System.out.println("penx: " + pen.getLayoutX() + "rootx: " + root.getMinWidth());
     }
@@ -191,28 +177,433 @@ public class Game extends Page {
         return selected;
     }
 
-    private void clearButtons(){
-        for(Node node : pen.getChildren()){
-            if(node.getClass() == guardB.getClass()){
-                node.setVisible(false);
-            }
-        }
-    }
-
-    private void clearLabels(){
-        for(Node node : pen.getChildren()){
-            if(node.getClass() == guardL.getClass()){
-                node.setVisible(false);
-            }
-        }
-    }
-
     private void showButton(Button btn, Label lbl){
         btn.setLayoutY(btny); lbl.setLayoutY(btny);
         btn.setLayoutX(45); lbl.setLayoutX(btn.getLayoutX() + btn.getWidth());
         btn.setDisable(false);
         btny += HEIGHT + 10;
         btn.setVisible(true); lbl.setVisible(true);
+    }
+
+    private void addButtons() {
+        Player currentPlayer = (turn == 0) ? p0 : p1;
+        ownpawn = (turn == 0) ? 1 : 2;
+        System.out.println("Turn: " + turn);
+
+        clearButtons();
+        clearLabels();
+        showButton(finishTurnB, new Label());
+
+        ArrayList<Move> buttonsToShow = currentPlayer.getPossibleMoves();
+        fillMoveCount(buttonsToShow);
+        fillLabels();
+
+        for (Move bts : buttonsToShow){
+            switch (bts.getType()){
+                case REDIRECT:
+                    showButton(redirectB, redirectL);
+                    break;
+                case GUARD:
+                    showButton(guardB, guardL);
+                    break;
+                case BURN:
+                    showButton(burnB, burnL);
+                    break;
+                case SPEED:
+                    showButton(speedB, speedL);
+                    break;
+                case PORTAL:
+                    showButton(portalB, portalL);
+                    break;
+                case ROTATE:
+                    showButton(rotateB, rotateL);
+                    break;
+                case RANGE:
+                    showButton(rangeB, rangeL);
+                    break;
+                default:
+                    System.out.println("button type: " + bts.getType());
+            }
+        }
+        setBackgroundColor();
+    }
+
+    private void redirect(){
+        Player currentPlayer = (turn == 0) ? p0 : p1;
+        System.out.println(moveCounts.values());
+        if (moveCounts.get(Move.type.REDIRECT) > 0) {
+            for (Pawn p : currentPlayer.pawns) {
+                if (p.c == selected) {
+                    p.isRotatable = true;
+                }
+            }
+            if (selected.contains == ownpawn) {
+                moveCounts.put(Move.type.REDIRECT, moveCounts.get(Move.type.REDIRECT)-1);
+            }
+            if(moveCounts.get(Move.type.REDIRECT) == 0){
+                redirectB.setDisable(true);
+            }
+        }
+        fillLabels();
+        System.out.println("On Redirect!!");
+    }
+
+    private void guard() {
+        System.out.println("On Guard!!");
+        if (moveCounts.get(Move.type.GUARD) > 0) {
+            int p = Cell.PAWN;
+            if( turn == 1 ) p = Cell.PAWN2;
+            if( debug || selected.contains == p ) {
+                for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
+                    if( c.getValue().contains == Cell.EMPTY )
+                        c.getValue().setIsPossible( 1 );
+
+                spell = Cell.BLOCK;
+            }
+            if (selected.contains == ownpawn) {
+                moveCounts.put(Move.type.GUARD, moveCounts.get(Move.type.GUARD)-1);
+            }
+            if(moveCounts.get(Move.type.GUARD) == 0){
+                guardB.setDisable(true);
+            }
+        }
+        fillLabels();
+    }
+
+    private void burn() {
+        System.out.println("On Burn!!");
+        if (moveCounts.get(Move.type.BURN) > 0) {
+            int p = Cell.PAWN;
+            if( turn == 1 ) p = Cell.PAWN2;
+            if( debug || selected.contains == p ) {
+                for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
+                    if( c.getValue().contains == Cell.EMPTY )
+                        c.getValue(  ).setIsPossible( 1 );
+
+                spell = Cell.LAVA;
+            }
+            if (selected.contains == ownpawn) {
+                moveCounts.put(Move.type.BURN, moveCounts.get(Move.type.BURN)-1);
+            }
+            if(moveCounts.get(Move.type.BURN) == 0){
+                burnB.setDisable(true);
+            }
+        }
+        fillLabels();
+    }
+
+    private void speed() {
+        System.out.println("On Speed!!");
+        if (moveCounts.get(Move.type.SPEED) > 0) {
+            int p = Cell.PAWN;
+            if( turn == 1 ) p = Cell.PAWN2;
+
+            if (debug || selected.contains == p) {
+
+            }
+            if (selected.contains == ownpawn) {
+                moveCounts.put(Move.type.SPEED, moveCounts.get(Move.type.SPEED)-1);
+            }
+            if(moveCounts.get(Move.type.SPEED) == 0){
+                speedB.setDisable(true);
+            }
+        }
+        fillLabels();
+    }
+
+    private void portal() {
+        System.out.println("On Portal!!");
+        if (moveCounts.get(Move.type.PORTAL) > 0) {
+            Cell selected = cells[selectedX][selectedY];
+            int p = Cell.PAWN;
+            if( turn == 1 ) p = Cell.PAWN2;
+
+            if (debug || selected.contains == p) {
+
+            }
+            if (selected.contains == ownpawn) {
+                moveCounts.put(Move.type.PORTAL, moveCounts.get(Move.type.PORTAL)-1);
+            }
+            if(moveCounts.get(Move.type.PORTAL) == 0){
+                portalB.setDisable(true);
+            }
+        }
+        fillLabels();
+    }
+
+    private void rotate() {
+        System.out.println("On Rotate!!");
+        if (moveCounts.get(Move.type.ROTATE) > 0) {
+            int p = Cell.PAWN;
+            if( turn == 1 ) p = Cell.PAWN2;
+
+            if (debug || selected.contains == p) {
+                if( selected.adj.size() == 6 ) {
+                    ArrayList<Integer> hold = new ArrayList<>();
+                    int beg = -1;
+                    for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() ) {
+                        if( beg == -1 ) beg = c.getValue().contains;
+                        else hold.add(c.getValue().contains);
+                    }
+                    hold.add( beg );
+                    beg = 0;
+                    for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
+                        c.getValue().setContains( hold.get( beg++ ) );
+
+                }
+            }
+            if (selected.contains == ownpawn) {
+                moveCounts.put(Move.type.ROTATE, moveCounts.get(Move.type.ROTATE)-1);
+            }
+            if(moveCounts.get(Move.type.ROTATE) == 0){
+                rotateB.setDisable(true);
+            }
+        }
+        fillLabels();
+    }
+
+    private void range() {
+        System.out.println("On Range!!");
+        if(moveCounts.get(Move.type.RANGE) > 0){
+            if (selected.contains == ownpawn) {
+                moveCounts.put(Move.type.RANGE, moveCounts.get(Move.type.RANGE)-1);
+            }
+            if(moveCounts.get(Move.type.RANGE) == 0){
+                rangeB.setDisable(true);
+            }
+        }
+        fillLabels();
+    }
+
+    private void proceed() {
+        System.out.println("On Proceed!!, Turn : " + turn);
+
+        if (selected != null) {
+            selected.setState(0);
+        }
+
+        Player pl = p0, en = p1;
+        if( turn == 1 ) {pl = p1;en = p0;}
+
+        for(int i = 0; i< pl.pawns.size(); i++) {
+            Pawn p = pl.pawns.get(i);
+
+            int d = p.direction;
+            Cell nex = p.c.adj.get( d );
+            if( nex != null && nex.contains != Cell.BLOCK && nex.contains != ownpawn ) {
+                if( nex.contains == (turn^1)+1 ) {
+                    en.erase( nex );
+                }
+                else if( nex.contains == Cell.LAVA ) {
+                    p.relocate( nex );
+                    pl.erase( nex );
+                    i--;
+                }
+                else if( nex.contains == Cell.BASE){
+                    pl.erase(p.c);
+                    p = null;
+                    en.base.health--;
+                }
+                if( p != null ) p.relocate( nex );
+            }
+
+        }
+        endTurn();
+        switchTurn();
+        for(int i=0;i<rows;i++, System.out.println())
+            for(int j=0;j<columns;j++)
+                System.out.print( cells[i][j].contains + " " );
+
+    }
+
+    private void endTurn(){
+        for(Pawn p : p0.pawns){
+            p.isRotatable = false;
+        }
+        for(Pawn p : p1.pawns){
+            p.isRotatable = false;
+        }
+        if(p0.base.health == 0 || p1.base.health == 0){
+            String winner = (turn == 0) ? "Red" : "Blue";
+            Alert endGame = new Alert(Alert.AlertType.INFORMATION);
+            endGame.setContentText(winner + " Won!");
+            endGame.setTitle("Game Over");
+            endGame.showAndWait();
+        }
+    }
+
+    private void setBackgroundColor(){
+        if(turn == 1){
+            root.setStyle("-fx-background-color: linear-gradient(to bottom, #FFFFFF, #9ac2f4);");
+        }
+        else{
+            root.setStyle("-fx-background-color: linear-gradient(to bottom, #FFFFFF, #f49ac2);");
+        }
+    }
+
+    private void switchTurn() {
+        btny = 40;
+        turn ^= 1;
+        addButtons();
+        clear();
+    }
+
+    private void handleStage0(){
+        quickFill = createButon("Quick Fill", 80, event -> {
+            try {
+                quickFill();
+                handleStage1();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+        placePawn = createButon("Place Pawn", 40, event -> {
+            if (turn == 0 && p0.pawnsToPlace != 0) {
+                if( selected.isPossible == 1 )
+                    try {
+                        Pawn p = new Pawn(selected, 0);
+                        p.draw(pen);
+                        p0.pawnsToPlace--;
+                        p.rotate();p.rotate();p.rotate();p.rotate();
+                        turn = 1;
+                        p0.addPawn( p );
+                        selected.setState(0);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+            } else if (turn == 1 && p1.pawnsToPlace != 0) {
+                if( selected.isPossible == 1 )
+                    try {
+                        Pawn p = new Pawn(selected, 1);
+                        p.draw(pen);
+                        p1.pawnsToPlace--;
+                        selected.setState(0);
+                        if( p1.pawnsToPlace == 0 ) {
+                            System.out.println("Stage0 completed");
+                            handleStage1();
+                        }
+                        p.rotate();
+                        turn = 0;
+                        p1.addPawn( p );
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+            }
+            if(p1.pawnsToPlace != 0) checkPlaces();
+        });
+        pen.getChildren().addAll(placePawn, quickFill);
+        checkPlaces();
+    }
+
+    private void placePawn(Cell c, int team) throws FileNotFoundException {
+        Player currentPlayer = (team == 0) ? p0 : p1;
+        if (currentPlayer.pawnsToPlace > 0) {
+            Pawn p = new Pawn(c, team);
+            currentPlayer.addPawn( p );
+            p.draw(pen);
+            currentPlayer.pawnsToPlace--;
+            if (currentPlayer == p0) {
+                p.rotate();
+                p.rotate();
+                p.rotate();
+                p.rotate();
+            }
+            else{
+                p.rotate();
+            }
+        }
+
+    }
+
+    private void quickFill() throws FileNotFoundException {
+        int c = 0, i = rows/2, col = 1;
+        placePawn(cells[i][col], 0);
+        while(p0.pawnsToPlace > 0){
+            c++;
+            placePawn(cells[i-c][col], 0);
+            placePawn(cells[i+c][col], 0);
+        }
+
+        c = 0; i = rows/2; col = columns-2;
+        placePawn(cells[i][col], 1);
+        while(p1.pawnsToPlace > 0){
+            if(c%2 == 0){
+                col = columns-1;
+            }
+            else{
+                col = columns-2;
+            }
+            c++;
+            placePawn(cells[i-c][col], 1);
+            placePawn(cells[i+c][col], 1);
+        }
+    }
+
+    private void clear() {
+        for(int i=0;i<rows;i++)
+            for(int j=0;j<columns;j++)
+                cells[i][j].setIsPossible(0);
+    }
+
+    private void checkPlaces() {
+        if( turn == 0 ) {
+            clear();
+            for(int i=0;i<rows;i++)
+                for(int j=0;j<2;j++)
+                    if (cells[i][j].contains == Cell.EMPTY) {
+                        cells[i][j].setIsPossible(1);
+                    }
+        } else {
+            clear();
+            for(int i=columns-2;i<columns;i++)
+                for(int j=0;j<rows;j++)
+                    if (cells[i][j].contains == Cell.EMPTY) {
+                        cells[j][i].setIsPossible(1);
+                    }
+        }
+        cells[rows/2][0].setIsPossible(0);
+        cells[rows/2][columns-1].setIsPossible(0);
+    }
+
+    private void handleStage1() {
+        clear();
+        placePawn.setVisible( false );
+        quickFill.setVisible( false );
+        pen.getChildren().add(finishTurnB);
+        turn = 0;
+        addButtons();
+    }
+
+    private void createRelations() {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                if( i % 2 == 0 ) {
+                    if (j + 1 < columns) connect(cells[i][j], cells[i][j + 1], 0);
+                    if (j + 1 < columns && i + 1 < rows) connect(cells[i][j], cells[i + 1][j+1], 1);
+                    if (i + 1 < rows) connect(cells[i][j], cells[i + 1][j], 2);
+                } else {
+                    if (j + 1 < columns) connect(cells[i][j], cells[i][j + 1], 0);
+                    if ( i + 1 <  rows ) connect(cells[i][j], cells[i + 1][j], 1);
+                    if (j > 0) connect(cells[i][j], cells[i + 1][j - 1], 2);
+                }
+            }
+        }
+    }
+
+    private void connect(Cell a, Cell b, int num) {
+        a.addAdj( num, b );
+        b.addAdj( num+3, a );
+    }
+
+    private void createComponents() {
+        for(int i=0;i<rows;i++) {
+            for(int j=0;j<columns;j++) {
+                double x = MinX + 2*H*j;
+                double y = MinY + 1.5*LENGTH*i;
+                if( i%2 == 1 ) x -= H;
+                cells[i][j] = new Cell( x+150, y+50, i, j, pen, this );
+            }
+        }
     }
 
     private void fillMoveCount(ArrayList<Move> buttonsToShow){
@@ -244,357 +635,56 @@ public class Game extends Page {
         rangeL.setText("" + moveCounts.get(Move.type.RANGE));
         rotateL.setText("" + moveCounts.get(Move.type.ROTATE));
         speedL.setText("" + moveCounts.get(Move.type.SPEED));
-    }
-
-    private void addButtons() {
-        Player currentPlayer = (turn == 0) ? p0 : p1;
-        System.out.println("Turn: " + turn);
-
-        clearButtons();
-        clearLabels();
-        showButton(finishTurnB, new Label());
-
-        ArrayList<Move> buttonsToShow = currentPlayer.getPossibleMoves();
-        fillMoveCount(buttonsToShow);
-        fillLabels();
-
-        for (Move bts : buttonsToShow){
-            switch (bts.getType()){
-                case REDIRECT:
-                    showButton(redirectB, redirectL);
-                    comboBox.setLayoutY(redirectB.getLayoutY());
-                    comboBox.setVisible(true);
-                    break;
-                case GUARD:
-                    showButton(guardB, guardL);
-                    break;
-                case BURN:
-                    showButton(burnB, burnL);
-                    break;
-                case SPEED:
-                    showButton(speedB, speedL);
-                    break;
-                case PORTAL:
-                    showButton(portalB, portalL);
-                    break;
-                case ROTATE:
-                    showButton(rotateB, rotateL);
-                    break;
-                case RANGE:
-                    showButton(rangeB, rangeL);
-                    break;
-                default:
-                    System.out.println("button type: " + bts.getType());
-            }
-        }
-    }
-
-    private void redirect(){
-        Player currentPlayer = (turn == 0) ? p0 : p1;
-        System.out.println(moveCounts.values());
-        if (moveCounts.get(Move.type.REDIRECT) > 0) {
-            for (Pawn p : currentPlayer.pawns) {
-                if (p.c == selected) {
-                    for (int i = 0; i < rotationVal; i++){
-                        p.rotate();
-                    }
-                }
-            }
-            moveCounts.put(Move.type.REDIRECT, moveCounts.get(Move.type.REDIRECT)-1);
-            if(moveCounts.get(Move.type.REDIRECT) == 0){
-                redirectB.setDisable(true);
-            }
-        }
-        fillLabels();
-        System.out.println("On Redirect!!");
-    }
-
-    private void guard() {
-        System.out.println("On Guard!!");
-        if (moveCounts.get(Move.type.GUARD) > 0) {
-            int p = Cell.PAWN;
-            if( turn == 1 ) p = Cell.PAWN2;
-            if( debug || selected.contains == p ) {
-
-                for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
-                    if( c.getValue().contains == Cell.EMPTY )
-                        c.getValue(  ).setIsPossible( 1 );
-
-                spell = Cell.BLOCK;
-            }
-            moveCounts.put(Move.type.GUARD, moveCounts.get(Move.type.GUARD)-1);
-            if(moveCounts.get(Move.type.GUARD) == 0){
-                guardB.setDisable(true);
-            }
-        }
-        fillLabels();
-    }
-
-    private void burn() {
-        System.out.println("On Burn!!");
-        if (moveCounts.get(Move.type.BURN) > 0) {
-            int p = Cell.PAWN;
-            if( turn == 1 ) p = Cell.PAWN2;
-            if( debug || selected.contains == p ) {
-                for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
-                    if( c.getValue().contains == Cell.EMPTY )
-                        c.getValue(  ).setIsPossible( 1 );
-
-                spell = Cell.LAVA;
-            }
-            moveCounts.put(Move.type.BURN, moveCounts.get(Move.type.BURN)-1);
-            if(moveCounts.get(Move.type.BURN) == 0){
-                burnB.setDisable(true);
-            }
-        }
-        fillLabels();
-    }
-
-    private void speed() {
-        System.out.println("On Speed!!");
-        if (moveCounts.get(Move.type.SPEED) > 0) {
-            int p = Cell.PAWN;
-            if( turn == 1 ) p = Cell.PAWN2;
-
-            if (debug || selected.contains == p) {
-
-            }
-            moveCounts.put(Move.type.SPEED, moveCounts.get(Move.type.SPEED)-1);
-            if(moveCounts.get(Move.type.SPEED) == 0){
-                speedB.setDisable(true);
-            }
-        }
-        fillLabels();
-    }
-
-    private void portal() {
-        System.out.println("On Portal!!");
-        if (moveCounts.get(Move.type.PORTAL) > 0) {
-            Cell selected = cells[selectedX][selectedY];
-            int p = Cell.PAWN;
-            if( turn == 1 ) p = Cell.PAWN2;
-
-            if (debug || selected.contains == p) {
-
-            }
-            moveCounts.put(Move.type.PORTAL, moveCounts.get(Move.type.PORTAL)-1);
-            if(moveCounts.get(Move.type.PORTAL) == 0){
-                portalB.setDisable(true);
-            }
-        }
-        fillLabels();
-    }
-
-    private void rotate() {
-        System.out.println("On Rotate!!");
-        if (moveCounts.get(Move.type.PORTAL) > 0) {
-            int p = Cell.PAWN;
-            if( turn == 1 ) p = Cell.PAWN2;
-
-            if (debug || selected.contains == p) {
-                if( selected.adj.size() == 6 ) {
-                    ArrayList<Integer> hold = new ArrayList<>();
-                    int beg = -1;
-                    for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() ) {
-                        if( beg == -1 ) beg = c.getValue().contains;
-                        else hold.add(c.getValue().contains);
-                    }
-                    hold.add( beg );
-                    beg = 0;
-                    for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
-                        c.getValue().setContains( hold.get( beg++ ) );
-
-                }
-            }
-            moveCounts.put(Move.type.ROTATE, moveCounts.get(Move.type.ROTATE)-1);
-            if(moveCounts.get(Move.type.ROTATE) == 0){
-                rotateB.setDisable(true);
-            }
-        }
-        fillLabels();
-    }
-
-    private void range() {
-        System.out.println("On Range!!");
-        if(moveCounts.get(Move.type.RANGE) > 0){
-            moveCounts.put(Move.type.RANGE, moveCounts.get(Move.type.RANGE)-1);
-            if(moveCounts.get(Move.type.RANGE) == 0){
-                rangeB.setDisable(true);
-            }
-        }
-        fillLabels();
-    }
-
-    private void proceed() {
-        System.out.println("On Proceed!!, Turn : " + turn);
-
-        Player pl = p0, en = p1;
-        if( turn == 1 ) {pl = p1;en = p0;}
-
-        int ownPawn = 1;
-        if( turn == 1 ) ownPawn = 2;
-
-        for(int i = 0; i< pl.pawns.size(); i++) {
-            Pawn p = pl.pawns.get(i);
-
-            int d = p.direction;
-            Cell nex = p.c.adj.get( d );
-            if( nex != null && nex.contains != Cell.BLOCK && nex.contains != ownPawn ) {
-                if( nex.contains == (turn^1)+1 ) {
-                    en.erase( nex );
-                }
-                else if( nex.contains == Cell.LAVA ) {
-                    p.relocate( nex );
-                    pl.erase( nex );
-                    i--;
-                }
-                else if( nex.contains == Cell.BASE){
-                    pl.erase(p.c);
-                    p = null;
-                    en.base.health--;
-                }
-                if( p != null ) p.relocate( nex );
-            }
-
-        }
-        endTurn();
-        switchTurn();
-        for(int i=0;i<rows;i++, System.out.println(""))
-            for(int j=0;j<columns;j++)
-                System.out.print( cells[i][j].contains + " " );
-
-    }
-
-    private void endTurn(){
-        if(p0.base.health == 0 || p1.base.health == 0){
-            String winner = (turn == 0) ? "Red" : "Blue";
-            Alert endGame = new Alert(Alert.AlertType.INFORMATION);
-            endGame.setContentText(winner + " Won!");
-            endGame.setTitle("Game Over");
-            endGame.showAndWait();
-
-        }
-    }
-
-    private void switchTurn() {
-        btny = 40;
-        turn ^= 1;
-        addButtons();
-    }
-
-    private void handleStage0(){
-
-         placePawn = createButon("Place Pawn", 40, event -> {
-            if (turn == 0 && p0.pawnsToPlace != 0) {
-                if( selected.isPossible == 1 )
-                    try {
-                        Pawn p = new Pawn(selected, 0);
-                        p.draw(pen);
-                        p0.pawnsToPlace--;
-                        p.rotate();p.rotate();p.rotate();p.rotate();
-                        turn = 1;
-                        p0.addPawn( p );
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-            } else if (turn == 1 && p1.pawnsToPlace != 0) {
-                if( selected.isPossible == 1 )
-                    try {
-                        Pawn p = new Pawn(selected, 1);
-                        p.draw(pen);
-                        p1.pawnsToPlace--;
-
-                        if( p1.pawnsToPlace == 0 ) {
-                            System.out.println("Stage0 completed");
-                            clear();
-                            handleStage1();
-                        }
-                        p.rotate();
-                        turn = 0;
-                        p1.addPawn( p );
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-            }
-            if(p1.pawnsToPlace != 0) checkPlaces();
-        });
-        pen.getChildren().add(placePawn);
-        checkPlaces();
-    }
-
-    public void clear() {
-
-        for(int i=0;i<rows;i++)
-            for(int j=0;j<columns;j++)
-                cells[i][j].setIsPossible(0);
-    }
-
-    private void checkPlaces() {
-        if( turn == 0 ) {
-            clear();
-            for(int i=0;i<rows;i++)
-                for(int j=0;j<2;j++)
-                    cells[i][j].setIsPossible(1);
-        } else {
-            clear();
-            for(int i=columns-2;i<columns;i++)
-                for(int j=0;j<rows;j++)
-                    cells[j][i].setIsPossible(1);
-        }
-        cells[rows/2][0].setIsPossible(0);
-        cells[rows/2][columns-1].setIsPossible(0);
-    }
-
-    private void handleStage1() {
-        placePawn.setVisible( false );
-        pen.getChildren().add(finishTurnB);
-        addButtons();
-    }
-
-    private void createRelations() {
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                if( i % 2 == 0 ) {
-                    if (j + 1 < columns) connect(cells[i][j], cells[i][j + 1], 0);
-                    if (j + 1 < columns && i + 1 < rows) connect(cells[i][j], cells[i + 1][j+1], 1);
-                    if (i + 1 < rows) connect(cells[i][j], cells[i + 1][j], 2);
-                } else {
-                    if (j + 1 < columns) connect(cells[i][j], cells[i][j + 1], 0);
-                    if ( i + 1 <  rows ) connect(cells[i][j], cells[i + 1][j], 1);
-                    if (j > 0) connect(cells[i][j], cells[i + 1][j - 1], 2);
-                }
-            }
-        }
-    }
-
-    private void connect(Cell a, Cell b, int num) {
-        a.addAdj( num, b );
-        b.addAdj( num+3, a );
-    }
-
-    private void createComponents() {
-        for(int i=0;i<rows;i++) {
-            for(int j=0;j<columns;j++) {
-                double x = MinX + 2*H*j;
-                double y = MinY + 1.5*LENGTH*i;
-                if( i%2 == 1 ) x -= H;
-                cells[i][j] = new Cell( x+90, y+50, i, j, pen, this );
-            }
-        }
+        p1Health.setText("" + p0.base.health);
+        p2Health.setText("" + p1.base.health);
     }
 
     private void drawBases(){
-        p0.base.shape.setLayoutX(cells[rows/2][0].x);
-        p0.base.shape.setLayoutY(cells[rows/2][0].y);
-        p1.base.shape.setLayoutX(cells[rows/2][columns-1].x);
-        p1.base.shape.setLayoutY(cells[rows/2][columns-1].y);
-        pen.getChildren().addAll(p0.base.shape, p1.base.shape);
+        p1Health = new Label();
+        p2Health = new Label();
 
         p0.base.cell = cells[rows/2][0];
         p1.base.cell = cells[rows/2][columns-1];
 
+        FontLoader fl = Toolkit.getToolkit().getFontLoader();
+
+        p1Health.setFont(Font.font("Ariel", 25));
+        p1Health.setText("" + p0.base.health);
+        double width1 = fl.computeStringWidth(p1Health.getText(), p1Health.getFont());
+        double height1 = fl.computeStringWidth("A", p1Health.getFont());
+        p1Health.setLayoutX(p0.base.cell.x - width1/2);
+        p1Health.setLayoutY(p0.base.cell.y - height1);
+        p1Health.setTextFill(Color.WHITE);
+
+        p2Health.setFont(Font.font("Ariel", 25));
+        p2Health.setText("" + p1.base.health);
+        p2Health.setLayoutX(p1.base.cell.x - width1/2);
+        p2Health.setLayoutY(p1.base.cell.y - height1);
+
+        p2Health.setTextFill(Color.WHITE);
+
         cells[rows/2][0].setContains(Cell.BASE);
         cells[rows/2][columns-1].setContains(Cell.BASE);
+
+        pen.getChildren().addAll(p1Health, p2Health);
+    }
+
+    private void clearButtons(){
+        for(Node node : pen.getChildren()){
+            if(node.getClass() == guardB.getClass()){
+                node.setVisible(false);
+            }
+        }
+    }
+
+    private void clearLabels(){
+        for(Node node : pen.getChildren()){
+            if(node.getClass() == guardL.getClass()){
+                node.setVisible(false);
+            }
+        }
+        p1Health.setVisible(true);
+        p2Health.setVisible(true);
     }
 
     public void draw() {

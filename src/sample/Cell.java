@@ -73,11 +73,12 @@ public class Cell extends Parent {
 
     void decideColor() {
 
-        if( isPossible == 0 ) hexagon.setFill(new Color( 0.0, 0.0, 0.0, 0.0 ));
-        if( isPossible == 1 ) hexagon.setFill(new Color( 0.2, 0.5, 0.5, 0.1 ));
+        if( isPossible == 0 ) hexagon.setFill(new Color( 1 , 1, 1, 0.9));
+        if( isPossible == 1 ) hexagon.setFill(new Color( 0.0, 0.9, 0.0, 0.2 ));
 
-        if( isSelected == 1 ) hexagon.setFill(new Color( 0.0, 0.9, 0.0, 0.1 ));
+        if( isSelected == 1 ) hexagon.setFill(new Color( 0.2, 0.5, 0.5, 0.3 ));
 
+        if( contains == BASE) hexagon.setFill(Color.BLACK);
         if( contains == LAVA ) hexagon.setFill( Color.RED );
         if( contains == BLOCK ) hexagon.setFill( Color.GRAY );
     }

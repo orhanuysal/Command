@@ -19,7 +19,7 @@ public class Player {
     Player(){
         coords = new ArrayList<>();
         pawns = new ArrayList<>();
-        pawnsToPlace = 5;
+        pawnsToPlace = 9;
         initialMoves = new ArrayList<>();
         initializeMoves();
         moveIndex = 0;

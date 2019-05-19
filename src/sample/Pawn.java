@@ -19,10 +19,11 @@ public class Pawn {
     public int direction;
     public int team;
     public ImageView pawnImage;
-    private Image bluerobot = new Image(new FileInputStream("resources//bluerobot.png"));
-    private Image redrobot = new Image(new FileInputStream("resources//redrobot.png"));
+    private Image bluerobot = new Image(new FileInputStream("resources/bluerobot.png"));
+    private Image redrobot = new Image(new FileInputStream("resources/redrobot.png"));
     private double height;
     private double width;
+    public boolean isRotatable;
 
     public Pawn( Cell c, int team ) throws FileNotFoundException {
         this.c = c;
@@ -30,6 +31,7 @@ public class Pawn {
         this.team = team;
         c.setContains( team+1 );
         moves = new ArrayList<>();
+        isRotatable = false;
     }
 
     public void relocate( Cell ccc ) {
@@ -46,7 +48,7 @@ public class Pawn {
     }
 
     public void draw(Group pen) throws FileNotFoundException {
-        System.out.println( "In Draw!!\n" );
+        //System.out.println( "In Draw!!\n" );
         width = bluerobot.getWidth();
         height = bluerobot.getHeight();
         double x = c.getX() - width/2;
@@ -58,14 +60,16 @@ public class Pawn {
             pawnImage = new ImageView(redrobot);
         }
 
-        System.out.println("height: " + height + " width: " + width);
-        System.out.println(x + " "+ y);
+        //System.out.println("height: " + height + " width: " + width);
+        //System.out.println(x + " "+ y);
 
         pawnImage.setLayoutX(x);
         pawnImage.setLayoutY(y);
         pawnImage.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if(event.getButton() == MouseButton.SECONDARY){
-                rotate();
+                if (isRotatable) {
+                    rotate();
+                }
             }
             else if( event.getButton() == MouseButton.PRIMARY ) {
                 c.clicked();
