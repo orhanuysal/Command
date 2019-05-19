@@ -58,7 +58,7 @@ public class Game extends Page {
     private Label guardL, burnL, speedL, rotateL, redirectL, rangeL, portalL, placePawnL, p1Health, p2Health;
     private HashMap<Move.type, Integer> moveCounts;
     private int rotationVal;
-    private double btny = 40;
+    private double btny = 80;
 
     public Game(GridPane root) {
 
@@ -84,11 +84,21 @@ public class Game extends Page {
         handleStage0();
     }
 
+    private void initButtonStyles(){
+        for(Node n : pen.getChildren()){
+            if(n.getClass() == guardB.getClass()){
+                n.getStyleClass().add("big-yellow");
+            }
+        }
+    }
+
     private void initButtons(){
         guardB = new Button("Guard");
         guardB.setVisible(false);
         guardB.setOnAction(event -> {
             guard();
+            Button btn = (Button)event.getSource();
+            btn.setDisable(true);
         });
         guardL = new Label();
         guardL.setVisible(false);
@@ -97,6 +107,8 @@ public class Game extends Page {
         burnB.setVisible(false);
         burnB.setOnAction(event -> {
             burn();
+            Button btn = (Button)event.getSource();
+            btn.setDisable(true);
         });
         burnL = new Label();
         burnL.setVisible(false);
@@ -106,6 +118,8 @@ public class Game extends Page {
         speedB.setVisible(false);
         speedB.setOnAction(event -> {
             speed();
+            Button btn = (Button)event.getSource();
+            btn.setDisable(true);
         });
         speedL = new Label();
         speedL.setVisible(false);
@@ -114,6 +128,8 @@ public class Game extends Page {
         rotateB.setVisible(false);
         rotateB.setOnAction(event -> {
             rotate();
+            Button btn = (Button)event.getSource();
+            btn.setDisable(true);
         });
         rotateL = new Label();
         rotateL.setVisible(false);
@@ -122,6 +138,8 @@ public class Game extends Page {
         redirectB.setVisible(false);
         redirectB.setOnAction(event -> {
             redirect();
+            Button btn = (Button)event.getSource();
+            btn.setDisable(true);
         });
         redirectL = new Label();
         redirectL.setVisible(false);
@@ -130,6 +148,8 @@ public class Game extends Page {
         rangeB.setVisible(false);
         rangeB.setOnAction(event -> {
             range();
+            Button btn = (Button)event.getSource();
+            btn.setDisable(true);
         });
         rangeL = new Label();
         rangeL.setVisible(false);
@@ -138,6 +158,8 @@ public class Game extends Page {
         portalB.setVisible(false);
         portalB.setOnAction(event -> {
             portal();
+            Button btn = (Button)event.getSource();
+            btn.setDisable(true);
         });
         portalL = new Label();
         portalL.setVisible(false);
@@ -148,8 +170,9 @@ public class Game extends Page {
             proceed();
         });
 
-        pen.getChildren().addAll(guardB, burnB, speedB, rotateB, redirectB, rangeB, portalB,
+        pen.getChildren().addAll(guardB, burnB, speedB, rotateB, redirectB, rangeB, portalB, finishTurnB,
                 guardL, burnL, speedL, rotateL, redirectL, rangeL, portalL);
+        initButtonStyles();
         //root.setMinWidth(1800);
         //System.out.println("penx: " + pen.getLayoutX() + "rootx: " + root.getMinWidth());
     }
@@ -163,7 +186,7 @@ public class Game extends Page {
         for(int i=0;i<rows;i++)
             for(int j=0;j<columns;j++) {
                 if( i == selectedX && j == selectedY ) cells[i][j].setState( 1 );
-                else cells[i][j].setState( 0 );
+                else if(cells[i][j] != null) cells[i][j].setState( 0 );
             }
         if( spell > 0 ) {
             if( c.isPossible == 1 ) {
@@ -172,17 +195,17 @@ public class Game extends Page {
             }
             for(int i=0;i<rows;i++)
                 for(int j=0;j<columns;j++)
-                    cells[i][j].setIsPossible( 0 );
+                    if(cells[i][j] != null) cells[i][j].setIsPossible( 0 );
         }
         return selected;
     }
 
-    private void showButton(Button btn, Label lbl){
-        btn.setLayoutY(btny); lbl.setLayoutY(btny);
-        btn.setLayoutX(45); lbl.setLayoutX(btn.getLayoutX() + btn.getWidth());
+    private void showButton(Button btn){
+        btn.setLayoutY(btny); //lbl.setLayoutY(btny);
+        btn.setLayoutX(45); //lbl.setLayoutX(btn.getLayoutX() + btn.getWidth());
         btn.setDisable(false);
         btny += HEIGHT + 10;
-        btn.setVisible(true); lbl.setVisible(true);
+        btn.setVisible(true); //lbl.setVisible(true);
     }
 
     private void addButtons() {
@@ -192,7 +215,7 @@ public class Game extends Page {
 
         clearButtons();
         clearLabels();
-        showButton(finishTurnB, new Label());
+        showButton(finishTurnB);
 
         ArrayList<Move> buttonsToShow = currentPlayer.getPossibleMoves();
         fillMoveCount(buttonsToShow);
@@ -201,25 +224,60 @@ public class Game extends Page {
         for (Move bts : buttonsToShow){
             switch (bts.getType()){
                 case REDIRECT:
-                    showButton(redirectB, redirectL);
+                    if (redirectB.isVisible()) {
+                        showButton(deepCopyButton(redirectB, pen));
+                    }
+                    else{
+                        showButton(redirectB);
+                    }
                     break;
                 case GUARD:
-                    showButton(guardB, guardL);
+                    if (guardB.isVisible()) {
+                        showButton(deepCopyButton(guardB, pen));
+                    }
+                    else{
+                        showButton(guardB);
+                    }
                     break;
                 case BURN:
-                    showButton(burnB, burnL);
+                    if (burnB.isVisible()) {
+                        showButton(deepCopyButton(burnB, pen));
+                    }
+                    else{
+                        showButton(burnB);
+                    }
                     break;
                 case SPEED:
-                    showButton(speedB, speedL);
+                    if (speedB.isVisible()) {
+                        showButton(deepCopyButton(speedB, pen));
+                    }
+                    else{
+                        showButton(speedB);
+                    }
                     break;
                 case PORTAL:
-                    showButton(portalB, portalL);
+                    if (portalB.isVisible()) {
+                        showButton(deepCopyButton(portalB, pen));
+                    }
+                    else{
+                        showButton(portalB);
+                    }
                     break;
                 case ROTATE:
-                    showButton(rotateB, rotateL);
+                    if (rotateB.isVisible()) {
+                        showButton(deepCopyButton(rotateB, pen));
+                    }
+                    else{
+                        showButton(rotateB);
+                    }
                     break;
                 case RANGE:
-                    showButton(rangeB, rangeL);
+                    if (rangeB.isVisible()) {
+                        showButton(deepCopyButton(rangeB, pen));
+                    }
+                    else{
+                        showButton(rangeB);
+                    }
                     break;
                 default:
                     System.out.println("button type: " + bts.getType());
@@ -314,7 +372,6 @@ public class Game extends Page {
     private void portal() {
         System.out.println("On Portal!!");
         if (moveCounts.get(Move.type.PORTAL) > 0) {
-            Cell selected = cells[selectedX][selectedY];
             int p = Cell.PAWN;
             if( turn == 1 ) p = Cell.PAWN2;
 
@@ -331,7 +388,7 @@ public class Game extends Page {
         fillLabels();
     }
 
-    private void rotate() {
+    private void rotate() { //TODO: Istedigi kadar dondorsun
         System.out.println("On Rotate!!");
         if (moveCounts.get(Move.type.ROTATE) > 0) {
             int p = Cell.PAWN;
@@ -394,25 +451,30 @@ public class Game extends Page {
                 if( nex.contains == (turn^1)+1 ) {
                     en.erase( nex );
                 }
-                else if( nex.contains == Cell.LAVA ) {
+                else if( nex.contains == Cell.LAVA ) { //TODO: BUG VAR BUNDA. Lavi silmemesi lazim
                     p.relocate( nex );
                     pl.erase( nex );
                     i--;
                 }
-                else if( nex.contains == Cell.BASE){
+                else if(en.base.cell == nex){
                     pl.erase(p.c);
                     p = null;
                     en.base.health--;
                 }
-                if( p != null ) p.relocate( nex );
+                if( p != null && pl.base.cell != nex) p.relocate( nex );
             }
 
         }
         endTurn();
         switchTurn();
         for(int i=0;i<rows;i++, System.out.println())
-            for(int j=0;j<columns;j++)
-                System.out.print( cells[i][j].contains + " " );
+            for(int j=0;j<columns;j++) {
+                if (cells[i][j] != null) {
+                    System.out.print(cells[i][j].contains + " ");
+                }
+                else
+                    System.out.print(" ");
+            }
 
     }
 
@@ -449,7 +511,7 @@ public class Game extends Page {
     }
 
     private void handleStage0(){
-        quickFill = createButon("Quick Fill", 80, event -> {
+        quickFill = createButon("Quick Fill", btny*2, event -> {
             try {
                 quickFill();
                 handleStage1();
@@ -457,7 +519,7 @@ public class Game extends Page {
                 e.printStackTrace();
             }
         });
-        placePawn = createButon("Place Pawn", 40, event -> {
+        placePawn = createButon("Place Pawn", btny, event -> {
             if (turn == 0 && p0.pawnsToPlace != 0) {
                 if( selected.isPossible == 1 )
                     try {
@@ -542,7 +604,9 @@ public class Game extends Page {
     private void clear() {
         for(int i=0;i<rows;i++)
             for(int j=0;j<columns;j++)
-                cells[i][j].setIsPossible(0);
+                if (cells[i][j] != null) {
+                    cells[i][j].setIsPossible(0);
+                }
     }
 
     private void checkPlaces() {
@@ -550,14 +614,14 @@ public class Game extends Page {
             clear();
             for(int i=0;i<rows;i++)
                 for(int j=0;j<2;j++)
-                    if (cells[i][j].contains == Cell.EMPTY) {
+                    if (cells[i][j] != null && cells[i][j].contains == Cell.EMPTY) {
                         cells[i][j].setIsPossible(1);
                     }
         } else {
             clear();
             for(int i=columns-2;i<columns;i++)
                 for(int j=0;j<rows;j++)
-                    if (cells[i][j].contains == Cell.EMPTY) {
+                    if (cells[i][j] != null && cells[i][j].contains == Cell.EMPTY) {
                         cells[j][i].setIsPossible(1);
                     }
         }
@@ -569,7 +633,7 @@ public class Game extends Page {
         clear();
         placePawn.setVisible( false );
         quickFill.setVisible( false );
-        pen.getChildren().add(finishTurnB);
+        //pen.getChildren().add(finishTurnB);
         turn = 0;
         addButtons();
     }
@@ -591,8 +655,10 @@ public class Game extends Page {
     }
 
     private void connect(Cell a, Cell b, int num) {
-        a.addAdj( num, b );
-        b.addAdj( num+3, a );
+        if (a != null && b != null) {
+            a.addAdj( num, b );
+            b.addAdj( num+3, a );
+        }
     }
 
     private void createComponents() {
@@ -602,6 +668,12 @@ public class Game extends Page {
                 double y = MinY + 1.5*LENGTH*i;
                 if( i%2 == 1 ) x -= H;
                 cells[i][j] = new Cell( x+150, y+50, i, j, pen, this );
+            }
+        }
+
+        for(int i = 0; i < rows; i++){
+            if(i%2 == 1){
+                cells[i][0] = null;
             }
         }
     }
@@ -690,7 +762,9 @@ public class Game extends Page {
     public void draw() {
         for(int i=0;i<rows;i++) {
             for(int j=0;j<columns;j++) {
-                cells[i][j].draw();
+                if (cells[i][j] != null) {
+                    cells[i][j].draw();
+                }
             }
         }
     }

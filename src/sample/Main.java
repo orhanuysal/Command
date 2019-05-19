@@ -17,6 +17,7 @@ public class Main extends Application {
         Game game = new Game( root );
 
         primaryStage.setScene(new Scene(root, game.sceneWidth+300, game.sceneHeight));
+        primaryStage.getScene().getStylesheets().add("sample/buttons.css");
         //primaryStage.setFullScreen(true);
 
 
