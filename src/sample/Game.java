@@ -387,18 +387,10 @@ public class Game extends Page {
 
     private void speed() {
         System.out.println("On Speed!!");
-        if (moveCounts.get(Move.type.SPEED) > 0) {
-            int p = Cell.PAWN;
-            if( turn == 1 ) p = Cell.PAWN2;
-
-            if (debug || selected.contains == p) {
-
-            }
-            if (selected.contains == ownpawn) {
-                moveCounts.put(Move.type.SPEED, moveCounts.get(Move.type.SPEED)-1);
-            }
-            if(moveCounts.get(Move.type.SPEED) == 0){
-                speedB.setDisable(true);
+        Player currentPlayer = (turn == 0) ? p0 : p1;
+        for (Pawn p : currentPlayer.pawns) {
+            if (p.c == selected) {
+                p.speed = true;
             }
         }
         fillLabels();
@@ -406,18 +398,12 @@ public class Game extends Page {
 
     private void portal() {
         System.out.println("On Portal!!");
-            int p = Cell.PAWN;
-            if( turn == 1 ) p = Cell.PAWN2;
-
-            if (debug || selected.contains == p) {
-
+        Player currentPlayer = (turn == 0) ? p0 : p1;
+        for (Pawn p : currentPlayer.pawns) {
+            if (p.c == selected) {
+                p.portal = true;
             }
-            if (selected.contains == ownpawn) {
-                moveCounts.put(Move.type.PORTAL, moveCounts.get(Move.type.PORTAL)-1);
-            }
-            if(moveCounts.get(Move.type.PORTAL) == 0){
-                portalB.setDisable(true);
-            }
+        }
         fillLabels();
     }
     private void helperRotate() {
@@ -462,7 +448,7 @@ public class Game extends Page {
             }
         fillLabels();
     }
-    private void rotate() { //TODO: Istedigi kadar dondorsun
+    private void rotate() {
         selected.isRotatable = true;
         rotating = selected;
     }
@@ -494,24 +480,30 @@ public class Game extends Page {
             Pawn p = pl.pawns.get(i);
 
             int d = p.direction;
-            Cell nex = p.c.adj.get( d );
-            if( nex != null && nex.contains != Cell.BLOCK && nex.contains != ownpawn ) {
-                if( nex.contains == (turn^1)+1 ) {
-                    en.erase( nex );
+
+            int rep = p.speed? 2:1;
+            while(rep-- > 0) {
+                Cell nex = p.c.adj.get( d );
+                if( p.portal )
+                    while( nex != null && nex.contains == Cell.BLOCK )
+                        nex = nex.adj.get( d );
+                if (nex != null && nex.contains != Cell.BLOCK && nex.contains != ownpawn) {
+                    if (nex.contains == (turn ^ 1) + 1) {
+                        en.erase(nex);
+                    } else if (nex.contains == Cell.LAVA) {
+                        pl.erase(p.c);
+                        p = null;
+                        i--;
+                    } else if (en.base.cell == nex) {
+                        pl.erase(p.c);
+                        p = null;
+                        i--;
+                        en.base.health--;
+                    }
+                    if (p != null && pl.base.cell != nex) p.relocate(nex);
                 }
-                else if( nex.contains == Cell.LAVA ) {
-                    pl.erase( p.c );
-                    p = null;
-                    i--;
-                }
-                else if(en.base.cell == nex){
-                    pl.erase(p.c);
-                    p = null;
-                    i--;
-                    en.base.health--;
-                }
-                if( p != null && pl.base.cell != nex) p.relocate( nex );
             }
+
 
         }
         endTurn();
