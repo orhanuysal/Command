@@ -68,7 +68,7 @@ public class Game extends Page {
     private double btny = 80;
 
     public ImageView helpImage;
-    private Image help = new Image(new FileInputStream("resources/bluerobot.png"));
+    private Image help = new Image(new FileInputStream("resources/qm.png"));
 
     private ArrayList< Button > butEvents;
     private Cell rotating;
@@ -542,10 +542,12 @@ public class Game extends Page {
                     if (p != null && pl.base.cell != nex) p.relocate(nex);
                 }
             }
-            if( p.range ) {
-                for(Map.Entry<Integer, Cell> c: p.c.adj.entrySet() ) {
-                    if (c.getValue().contains == (turn ^ 1) + 1) {
-                        en.erase(c.getValue());
+            if (p != null) {
+                if( p.range ) {
+                    for(Map.Entry<Integer, Cell> c: p.c.adj.entrySet() ) {
+                        if (c.getValue().contains == (turn ^ 1) + 1) {
+                            en.erase(c.getValue());
+                        }
                     }
                 }
             }
@@ -570,13 +572,14 @@ public class Game extends Page {
             p.speed = false;
             p.portal = false;
             p.range = false;
+            p.pawnImage.toFront();
         }
         for(Pawn p : p1.pawns){
             p.isRotatable = false;
             p.speed = false;
             p.portal = false;
             p.range = false;
-
+            p.pawnImage.toFront();
         }
         rotating = null;
         if(p0.base.health == 0 || p1.base.health == 0){
