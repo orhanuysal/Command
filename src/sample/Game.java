@@ -110,7 +110,7 @@ public class Game extends Page {
                 endGame.setContentText("Start the game with placing your 9 pawn and assign them a direction.\n" +
                         "\n" +
                         "Make moves each turn:\n" +
-                        "Redirect: Give a piece ability change its direction. Right click to change\n" +
+                        "Redirect: Give a piece ability change its direction. Right click to change. \n" +
                         "Guard: Put a block so that nobody goes there.\n" +
                         "Burn: Put a lava that kills anybody going there.\n" +
                         "Rotate: Give a piece rotation ability. Press R to rotate its surroundings.\n" +
@@ -583,6 +583,7 @@ public class Game extends Page {
             String winner = (turn == 0) ? "Red" : "Blue";
             Alert endGame = new Alert(Alert.AlertType.INFORMATION);
             endGame.setContentText(winner + " Won!");
+            endGame.setHeaderText("Game Over");
             endGame.setTitle("Game Over");
             endGame.showAndWait();
         }
@@ -600,7 +601,7 @@ public class Game extends Page {
     }
 
     private void switchTurn() {
-        btny = 40;
+        btny = 80;
         turn ^= 1;
         addButtons();
         clear();
