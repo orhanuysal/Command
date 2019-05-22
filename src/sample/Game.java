@@ -15,8 +15,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.GridPane;
@@ -27,6 +31,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.util.Pair;
 
 import javax.swing.plaf.synth.SynthEditorPaneUI;
+import java.io.FileInputStream;
 import java.util.*;
 import java.io.FileNotFoundException;
 
@@ -62,10 +67,13 @@ public class Game extends Page {
     private int rotationVal;
     private double btny = 80;
 
+    public ImageView helpImage;
+    private Image help = new Image(new FileInputStream("resources/bluerobot.png"));
+
     private ArrayList< Button > butEvents;
     private Cell rotating;
 
-    public Game(GridPane root) {
+    public Game(GridPane root) throws FileNotFoundException {
 
         this.root = root;
 
@@ -85,8 +93,38 @@ public class Game extends Page {
         draw();
         initButtons();
         drawBases();
+        setHelpImage();
+
 
         handleStage0();
+    }
+
+    private void setHelpImage() {
+        helpImage = new ImageView( help );
+        helpImage.setLayoutX(50);
+        helpImage.setLayoutY(50);
+        helpImage.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if( event.getButton() == MouseButton.PRIMARY ) {
+                Alert endGame = new Alert(Alert.AlertType.INFORMATION);
+                endGame.setHeaderText( "Command!!" );
+                endGame.setContentText("Start the game with placing your 9 pawn and assign them a direction.\n" +
+                        "\n" +
+                        "Cast a spell each turn:\n" +
+                        "Guard: Put a block so that nobody go there.\n" +
+                        "Burn: Put a lava that kills anybody going there.\n" +
+                        "Rotate: Give a piece rotation ability. Press R to rotate its surroundings.\n" +
+                        "Speed: Your pawn moves double!\n" +
+                        "Portal: Your pawn passes all the blocks in its way.\n" +
+                        "Range: Your pawn will kill its surroundings after it finishes to go 1 cell forward.\n" +
+                        "\n" +
+                        "The one placing its 3 pawns to enemy cell will be the winner.\n" +
+                        "\n" +
+                        "Have Fun!\n");
+                endGame.setTitle("Help");
+                endGame.showAndWait();
+            }
+        });
+        pen.getChildren().addAll(helpImage);
     }
 
     private void initButtonStyles(){
