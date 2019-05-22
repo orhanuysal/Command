@@ -60,7 +60,7 @@ public class Game extends Page {
     private Label guardL, burnL, speedL, rotateL, redirectL, rangeL, portalL, placePawnL, p1Health, p2Health;
     private HashMap<Move.type, Integer> moveCounts;
     private int rotationVal;
-    private double btny = 50;
+    private double btny = 80;
 
     private ArrayList< Button > butEvents;
     private Cell rotating;
@@ -241,6 +241,9 @@ public class Game extends Page {
 
         ArrayList<Move> buttonsToShow = currentPlayer.getPossibleMoves();
         fillMoveCount(buttonsToShow);
+        fillLabels();
+
+
 
         for (Move bts : buttonsToShow){
             switch (bts.getType()){
@@ -334,7 +337,7 @@ public class Game extends Page {
                 redirectB.setDisable(true);
             }
         }
-
+        fillLabels();
         System.out.println("On Redirect!!");
     }
 
@@ -357,6 +360,7 @@ public class Game extends Page {
                 guardB.setDisable(true);
             }
         }
+        fillLabels();
     }
 
     private void burn() {
@@ -378,7 +382,7 @@ public class Game extends Page {
                 burnB.setDisable(true);
             }
         }
-
+        fillLabels();
     }
 
     private void speed() {
@@ -389,7 +393,7 @@ public class Game extends Page {
                 p.speed = true;
             }
         }
-
+        fillLabels();
     }
 
     private void portal() {
@@ -400,6 +404,7 @@ public class Game extends Page {
                 p.portal = true;
             }
         }
+        fillLabels();
     }
     private void helperRotate() {
         System.out.println("On Rotate!!");
@@ -441,6 +446,7 @@ public class Game extends Page {
 
                 }
             }
+        fillLabels();
     }
     private void rotate() {
         selected.isRotatable = true;
@@ -449,15 +455,13 @@ public class Game extends Page {
 
     private void range() {
         System.out.println("On Range!!");
-        if(moveCounts.get(Move.type.RANGE) > 0){
-            if (selected.contains == ownpawn) {
-                moveCounts.put(Move.type.RANGE, moveCounts.get(Move.type.RANGE)-1);
-            }
-            if(moveCounts.get(Move.type.RANGE) == 0){
-                rangeB.setDisable(true);
+        Player currentPlayer = (turn == 0) ? p0 : p1;
+        for (Pawn p : currentPlayer.pawns) {
+            if (p.c == selected) {
+                p.range = true;
             }
         }
-
+        fillLabels();
     }
 
     private void proceed() {
@@ -477,10 +481,10 @@ public class Game extends Page {
 
             int rep = p.speed? 2:1;
             while(rep-- > 0) {
-                Cell nex = p.c.adj.get( d );
-                if( p.portal )
-                    while( nex != null && nex.contains == Cell.BLOCK )
-                        nex = nex.adj.get( d );
+                Cell nex = p.c.adj.get(d);
+                if (p.portal)
+                    while (nex != null && nex.contains == Cell.BLOCK)
+                        nex = nex.adj.get(d);
                 if (nex != null && nex.contains != Cell.BLOCK && nex.contains != ownpawn) {
                     if (nex.contains == (turn ^ 1) + 1) {
                         en.erase(nex);
@@ -495,6 +499,13 @@ public class Game extends Page {
                         en.base.health--;
                     }
                     if (p != null && pl.base.cell != nex) p.relocate(nex);
+                }
+            }
+            if( p.range ) {
+                for(Map.Entry<Integer, Cell> c: p.c.adj.entrySet() ) {
+                    if (c.getValue().contains == (turn ^ 1) + 1) {
+                        en.erase(c.getValue());
+                    }
                 }
             }
 
@@ -513,17 +524,18 @@ public class Game extends Page {
     }
 
     private void endTurn(){
-        for(Pawn p : p0.pawns){
+        for(Pawn p : p0.pawns) {
             p.isRotatable = false;
             p.speed = false;
             p.portal = false;
-            p.pawnImage.toFront();
+            p.range = false;
         }
         for(Pawn p : p1.pawns){
             p.isRotatable = false;
             p.speed = false;
             p.portal = false;
-            p.pawnImage.toFront();
+            p.range = false;
+
         }
         rotating = null;
         if(p0.base.health == 0 || p1.base.health == 0){
@@ -547,14 +559,14 @@ public class Game extends Page {
     }
 
     private void switchTurn() {
-        btny = 50;
+        btny = 40;
         turn ^= 1;
         addButtons();
         clear();
     }
 
     private void handleStage0(){
-        quickFill = createButon("Quick Fill", btny+HEIGHT+10, event -> {
+        quickFill = createButon("Quick Fill", btny*2, event -> {
             try {
                 quickFill();
                 handleStage1();
@@ -710,7 +722,7 @@ public class Game extends Page {
                 double x = MinX + 2*H*j;
                 double y = MinY + 1.5*LENGTH*i;
                 if( i%2 == 1 ) x -= H;
-                cells[i][j] = new Cell( x+150, y, i, j, pen, this );
+                cells[i][j] = new Cell( x+150, y+50, i, j, pen, this );
             }
         }
 
@@ -740,6 +752,18 @@ public class Game extends Page {
             }
         }
         return res;
+    }
+
+    private void fillLabels(){
+        redirectL.setText("" + moveCounts.get(Move.type.REDIRECT));
+        burnL.setText("" + moveCounts.get(Move.type.BURN));
+        guardL.setText("" + moveCounts.get(Move.type.GUARD));
+        portalL.setText("" + moveCounts.get(Move.type.PORTAL));
+        rangeL.setText("" + moveCounts.get(Move.type.RANGE));
+        rotateL.setText("" + moveCounts.get(Move.type.ROTATE));
+        speedL.setText("" + moveCounts.get(Move.type.SPEED));
+        p1Health.setText("" + p0.base.health);
+        p2Health.setText("" + p1.base.health);
     }
 
     private void drawBases(){
