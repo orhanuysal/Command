@@ -395,19 +395,7 @@ public class Game extends Page {
             if( turn == 1 ) p = Cell.PAWN2;
 
             if (debug || selected.contains == p) {
-                if( selected.adj.size() == 6 ) {
-                    ArrayList<Integer> hold = new ArrayList<>();
-                    int beg = -1;
-                    for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() ) {
-                        if( beg == -1 ) beg = c.getValue().contains;
-                        else hold.add(c.getValue().contains);
-                    }
-                    hold.add( beg );
-                    beg = 0;
-                    for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() )
-                        c.getValue().setContains( hold.get( beg++ ) );
-
-                }
+                selected.isRotatable = true;
             }
             if (selected.contains == ownpawn) {
                 moveCounts.put(Move.type.ROTATE, moveCounts.get(Move.type.ROTATE)-1);
@@ -484,6 +472,12 @@ public class Game extends Page {
         }
         for(Pawn p : p1.pawns){
             p.isRotatable = false;
+        }
+        for (int i = 0; i < rows; i++){
+            for(int j = 0; j < columns; j++){
+                if(cells[i][j] != null)
+                    cells[i][j].isRotatable = false;
+            }
         }
         if(p0.base.health == 0 || p1.base.health == 0){
             String winner = (turn == 0) ? "Red" : "Blue";

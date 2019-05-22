@@ -6,6 +6,7 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.effect.Light;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
@@ -14,6 +15,7 @@ import javafx.scene.shape.Polyline;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Cell extends Parent {
     public double x, y;
@@ -30,6 +32,7 @@ public class Cell extends Parent {
     public int contains = 0;
     public int isSelected = 0;
     public int isPossible = 0;
+    public boolean isRotatable = false;
     public Polygon hexagon;
     public Game game;
 
@@ -102,8 +105,27 @@ public class Cell extends Parent {
         hexagon.setOnMouseClicked(event -> {
             System.out.printf( "Clicked!! %d %d\n", idx, idy );
             clicked();
+            if(event.getButton() == MouseButton.SECONDARY && isRotatable){
+                rotate();
+            }
         });
         root.getChildren().addAll( hexagon );
+    }
+
+    public void rotate() {
+        if( this.adj.size() == 6 ) {
+            ArrayList<Integer> hold = new ArrayList<>();
+            int beg = -1;
+            for(Map.Entry<Integer, Cell> c: this.adj.entrySet() ) {
+                if( beg == -1 ) beg = c.getValue().contains;
+                else hold.add(c.getValue().contains);
+            }
+            hold.add( beg );
+            beg = 0;
+            for(Map.Entry<Integer, Cell> c: this.adj.entrySet() )
+                c.getValue().setContains( hold.get( beg++ ) );
+
+        }
     }
 
     public void clicked() {
