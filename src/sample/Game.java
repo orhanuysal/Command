@@ -60,7 +60,7 @@ public class Game extends Page {
     private Label guardL, burnL, speedL, rotateL, redirectL, rangeL, portalL, placePawnL, p1Health, p2Health;
     private HashMap<Move.type, Integer> moveCounts;
     private int rotationVal;
-    private double btny = 80;
+    private double btny = 50;
 
     private ArrayList< Button > butEvents;
 
@@ -240,9 +240,6 @@ public class Game extends Page {
 
         ArrayList<Move> buttonsToShow = currentPlayer.getPossibleMoves();
         fillMoveCount(buttonsToShow);
-        fillLabels();
-
-
 
         for (Move bts : buttonsToShow){
             switch (bts.getType()){
@@ -335,7 +332,7 @@ public class Game extends Page {
                 redirectB.setDisable(true);
             }
         }
-        fillLabels();
+        
         System.out.println("On Redirect!!");
     }
 
@@ -358,7 +355,7 @@ public class Game extends Page {
                 guardB.setDisable(true);
             }
         }
-        fillLabels();
+        
     }
 
     private void burn() {
@@ -380,7 +377,7 @@ public class Game extends Page {
                 burnB.setDisable(true);
             }
         }
-        fillLabels();
+        
     }
 
     private void speed() {
@@ -399,7 +396,7 @@ public class Game extends Page {
                 speedB.setDisable(true);
             }
         }
-        fillLabels();
+        
     }
 
     private void portal() {
@@ -416,7 +413,7 @@ public class Game extends Page {
             if(moveCounts.get(Move.type.PORTAL) == 0){
                 portalB.setDisable(true);
             }
-        fillLabels();
+        
     }
 
     private void rotate() { //TODO: Istedigi kadar dondorsun
@@ -435,7 +432,7 @@ public class Game extends Page {
                 rotateB.setDisable(true);
             }
         }
-        fillLabels();
+        
     }
 
     private void range() {
@@ -448,7 +445,7 @@ public class Game extends Page {
                 rangeB.setDisable(true);
             }
         }
-        fillLabels();
+        
     }
 
     private void proceed() {
@@ -532,14 +529,14 @@ public class Game extends Page {
     }
 
     private void switchTurn() {
-        btny = 40;
+        btny = 50;
         turn ^= 1;
         addButtons();
         clear();
     }
 
     private void handleStage0(){
-        quickFill = createButon("Quick Fill", btny*2, event -> {
+        quickFill = createButon("Quick Fill", btny+HEIGHT+10, event -> {
             try {
                 quickFill();
                 handleStage1();
@@ -695,7 +692,7 @@ public class Game extends Page {
                 double x = MinX + 2*H*j;
                 double y = MinY + 1.5*LENGTH*i;
                 if( i%2 == 1 ) x -= H;
-                cells[i][j] = new Cell( x+150, y+50, i, j, pen, this );
+                cells[i][j] = new Cell( x+150, y, i, j, pen, this );
             }
         }
 
@@ -725,18 +722,6 @@ public class Game extends Page {
             }
         }
         return res;
-    }
-
-    private void fillLabels(){
-        redirectL.setText("" + moveCounts.get(Move.type.REDIRECT));
-        burnL.setText("" + moveCounts.get(Move.type.BURN));
-        guardL.setText("" + moveCounts.get(Move.type.GUARD));
-        portalL.setText("" + moveCounts.get(Move.type.PORTAL));
-        rangeL.setText("" + moveCounts.get(Move.type.RANGE));
-        rotateL.setText("" + moveCounts.get(Move.type.ROTATE));
-        speedL.setText("" + moveCounts.get(Move.type.SPEED));
-        p1Health.setText("" + p0.base.health);
-        p2Health.setText("" + p1.base.health);
     }
 
     private void drawBases(){

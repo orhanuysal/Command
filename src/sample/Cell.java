@@ -6,12 +6,17 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.effect.Light;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Polyline;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,6 +40,15 @@ public class Cell extends Parent {
     public boolean isRotatable = false;
     public Polygon hexagon;
     public Game game;
+    private Image lava, block;
+
+    {
+        try {
+            lava = new Image(new FileInputStream("resources/lava.png"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 
     public HashMap< Integer, Cell > adj;
 
@@ -78,12 +92,19 @@ public class Cell extends Parent {
 
         if( isPossible == 0 ) hexagon.setFill(new Color( 1 , 1, 1, 0.9));
         if( isPossible == 1 ) hexagon.setFill(new Color( 0.0, 0.9, 0.0, 0.2 ));
-
         if( isSelected == 1 ) hexagon.setFill(new Color( 0.2, 0.5, 0.5, 0.3 ));
-
         if( contains == BASE) hexagon.setFill(Color.BLACK);
-        if( contains == LAVA ) hexagon.setFill( Color.RED );
-        if( contains == BLOCK ) hexagon.setFill( Color.GRAY );
+        if( contains == LAVA ) {
+            hexagon.setFill( new ImagePattern(lava));
+            this.hexagon.setStrokeWidth(3);
+            this.hexagon.setStroke( new Color((float)137/255, 0.0, 0.0, 1) );
+            this.hexagon.toFront();
+        }
+        if( contains == BLOCK ) {
+            hexagon.setFill( Color.GRAY );
+            this.hexagon.setStrokeWidth(5);
+            this.hexagon.toFront();
+        }
     }
 
     public void draw(  ) {
