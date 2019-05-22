@@ -478,23 +478,35 @@ public class Game extends Page {
             Pawn p = pl.pawns.get(i);
 
             int d = p.direction;
-            Cell nex = p.c.adj.get( d );
-            if( nex != null && nex.contains != Cell.BLOCK && nex.contains != ownpawn ) {
-                if( nex.contains == (turn^1)+1 ) {
-                    en.erase( nex );
+
+            int rep = p.speed? 2:1;
+            while(rep-- > 0) {
+                Cell nex = p.c.adj.get(d);
+                if (p.portal)
+                    while (nex != null && nex.contains == Cell.BLOCK)
+                        nex = nex.adj.get(d);
+                if (nex != null && nex.contains != Cell.BLOCK && nex.contains != ownpawn) {
+                    if (nex.contains == (turn ^ 1) + 1) {
+                        en.erase(nex);
+                    } else if (nex.contains == Cell.LAVA) {
+                        pl.erase(p.c);
+                        p = null;
+                        i--;
+                    } else if (en.base.cell == nex) {
+                        pl.erase(p.c);
+                        p = null;
+                        i--;
+                        en.base.health--;
+                    }
+                    if (p != null && pl.base.cell != nex) p.relocate(nex);
                 }
-                else if( nex.contains == Cell.LAVA ) { //TODO: BUG VAR BUNDA. Lavi silmemesi lazim
-                    pl.erase( p.c );
-                    p = null;
-                    i--;
+            }
+            if( p.range ) {
+                for(Map.Entry<Integer, Cell> c: p.c.adj.entrySet() ) {
+                    if (c.getValue().contains == (turn ^ 1) + 1) {
+                        en.erase(c.getValue());
+                    }
                 }
-                else if(en.base.cell == nex){
-                    pl.erase(p.c);
-                    p = null;
-                    i--;
-                    en.base.health--;
-                }
-                if( p != null && pl.base.cell != nex) p.relocate( nex );
             }
 
         }
