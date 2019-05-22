@@ -54,6 +54,7 @@ public class Cell extends Parent {
 
     public Cell(double x, double y, int idx, int idy, Group root, Game game) {
         this.game = game;
+        isRotatable = false;
         this.idx = idx;
         this.idy = idy;
         adj = new HashMap<>();
@@ -93,6 +94,10 @@ public class Cell extends Parent {
         if( isPossible == 0 ) hexagon.setFill(new Color( 1 , 1, 1, 0.9));
         if( isPossible == 1 ) hexagon.setFill(new Color( 0.0, 0.9, 0.0, 0.2 ));
         if( isSelected == 1 ) hexagon.setFill(new Color( 0.2, 0.5, 0.5, 0.3 ));
+        if( contains == EMPTY ) {
+            this.hexagon.setStroke( Color.BLACK );
+            this.hexagon.setStrokeWidth(1);
+        }
         if( contains == BASE) hexagon.setFill(Color.BLACK);
         if( contains == LAVA ) {
             hexagon.setFill( new ImagePattern(lava));
@@ -102,6 +107,7 @@ public class Cell extends Parent {
         }
         if( contains == BLOCK ) {
             hexagon.setFill( Color.GRAY );
+            this.hexagon.setStroke( Color.BLACK );
             this.hexagon.setStrokeWidth(5);
             this.hexagon.toFront();
         }

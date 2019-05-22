@@ -63,6 +63,7 @@ public class Game extends Page {
     private double btny = 50;
 
     private ArrayList< Button > butEvents;
+    private Cell rotating;
 
     public Game(GridPane root) {
 
@@ -137,7 +138,7 @@ public class Game extends Page {
         rotateB = new Button("Rotate");
         rotateB.setVisible(false);
         rotateB.setOnAction(event -> {
-            if( selected != null && selected.contains == turn+1 ) {
+            if( selected != null && selected.contains == turn+1 && selected.adj.size() == 6 ) {
                 rotate();
                 Button btn = (Button)event.getSource();
                 btn.setDisable(true);
@@ -311,6 +312,7 @@ public class Game extends Page {
                 case DIGIT3: butEvents.get(2).fire(); break;
                 case DIGIT4: butEvents.get(3).fire(); break;
                 case DIGIT5: butEvents.get(4).fire(); break;
+                case R: helperRotate(); break;
             }
         } );
         setBackgroundColor();
@@ -332,7 +334,7 @@ public class Game extends Page {
                 redirectB.setDisable(true);
             }
         }
-        
+
         System.out.println("On Redirect!!");
     }
 
@@ -355,7 +357,6 @@ public class Game extends Page {
                 guardB.setDisable(true);
             }
         }
-        
     }
 
     private void burn() {
@@ -377,62 +378,73 @@ public class Game extends Page {
                 burnB.setDisable(true);
             }
         }
-        
+
     }
 
     private void speed() {
         System.out.println("On Speed!!");
-        if (moveCounts.get(Move.type.SPEED) > 0) {
-            int p = Cell.PAWN;
-            if( turn == 1 ) p = Cell.PAWN2;
-
-            if (debug || selected.contains == p) {
-
-            }
-            if (selected.contains == ownpawn) {
-                moveCounts.put(Move.type.SPEED, moveCounts.get(Move.type.SPEED)-1);
-            }
-            if(moveCounts.get(Move.type.SPEED) == 0){
-                speedB.setDisable(true);
+        Player currentPlayer = (turn == 0) ? p0 : p1;
+        for (Pawn p : currentPlayer.pawns) {
+            if (p.c == selected) {
+                p.speed = true;
             }
         }
-        
+
     }
 
     private void portal() {
         System.out.println("On Portal!!");
-            int p = Cell.PAWN;
-            if( turn == 1 ) p = Cell.PAWN2;
-
-            if (debug || selected.contains == p) {
-
-            }
-            if (selected.contains == ownpawn) {
-                moveCounts.put(Move.type.PORTAL, moveCounts.get(Move.type.PORTAL)-1);
-            }
-            if(moveCounts.get(Move.type.PORTAL) == 0){
-                portalB.setDisable(true);
-            }
-        
-    }
-
-    private void rotate() { //TODO: Istedigi kadar dondorsun
-        System.out.println("On Rotate!!");
-        if (moveCounts.get(Move.type.ROTATE) > 0) {
-            int p = Cell.PAWN;
-            if( turn == 1 ) p = Cell.PAWN2;
-
-            if (debug || selected.contains == p) {
-                selected.isRotatable = true;
-            }
-            if (selected.contains == ownpawn) {
-                moveCounts.put(Move.type.ROTATE, moveCounts.get(Move.type.ROTATE)-1);
-            }
-            if(moveCounts.get(Move.type.ROTATE) == 0){
-                rotateB.setDisable(true);
+        Player currentPlayer = (turn == 0) ? p0 : p1;
+        for (Pawn p : currentPlayer.pawns) {
+            if (p.c == selected) {
+                p.portal = true;
             }
         }
-        
+    }
+    private void helperRotate() {
+        System.out.println("On Rotate!!");
+        if( rotating == null || rotating != selected ) return;
+
+            int p = Cell.PAWN;
+            if( turn == 1 ) p = Cell.PAWN2;
+
+            if (debug || selected.contains == p) {
+                if( selected.adj.size() == 6 ) {
+                    ArrayList<Integer> hold = new ArrayList<>();
+                    int beg = -1;
+                    for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() ) {
+                        if( beg == -1 ) beg = c.getValue().contains;
+                        else hold.add(c.getValue().contains);
+                    }
+                    hold.add( beg );
+                    beg = 0;
+                    for(Map.Entry<Integer, Cell> c: selected.adj.entrySet() ) {
+                        System.out.println("ADJ: " + c.getKey());
+                        int t = hold.get( beg );
+                        if( t == Cell.PAWN ) {
+                            int nex = c.getKey() + 1;
+                            if( nex == 6 ) nex = 0;
+                            Pawn temp = p0.get( selected.adj.get( nex ) );
+                            for(int i=0;i<5;i++) temp.rotate();
+                            temp.relocate( c.getValue() );
+                        }
+                        if( t == Cell.PAWN2 ) {
+                            int nex = c.getKey() + 1;
+                            if( nex == 6 ) nex = 0;
+                            Pawn temp = p1.get( selected.adj.get( nex ) );
+                            for(int i=0;i<5;i++) temp.rotate();
+                            temp.relocate( c.getValue() );
+                        }
+                        c.getValue().setContains( t );
+                        beg++;
+                    }
+
+                }
+            }
+    }
+    private void rotate() {
+        selected.isRotatable = true;
+        rotating = selected;
     }
 
     private void range() {
@@ -445,7 +457,7 @@ public class Game extends Page {
                 rangeB.setDisable(true);
             }
         }
-        
+
     }
 
     private void proceed() {
@@ -462,23 +474,28 @@ public class Game extends Page {
             Pawn p = pl.pawns.get(i);
 
             int d = p.direction;
-            Cell nex = p.c.adj.get( d );
-            if( nex != null && nex.contains != Cell.BLOCK && nex.contains != ownpawn ) {
-                if( nex.contains == (turn^1)+1 ) {
-                    en.erase( nex );
+
+            int rep = p.speed? 2:1;
+            while(rep-- > 0) {
+                Cell nex = p.c.adj.get( d );
+                if( p.portal )
+                    while( nex != null && nex.contains == Cell.BLOCK )
+                        nex = nex.adj.get( d );
+                if (nex != null && nex.contains != Cell.BLOCK && nex.contains != ownpawn) {
+                    if (nex.contains == (turn ^ 1) + 1) {
+                        en.erase(nex);
+                    } else if (nex.contains == Cell.LAVA) {
+                        pl.erase(p.c);
+                        p = null;
+                        i--;
+                    } else if (en.base.cell == nex) {
+                        pl.erase(p.c);
+                        p = null;
+                        i--;
+                        en.base.health--;
+                    }
+                    if (p != null && pl.base.cell != nex) p.relocate(nex);
                 }
-                else if( nex.contains == Cell.LAVA ) { //TODO: BUG VAR BUNDA. Lavi silmemesi lazim
-                    pl.erase( p.c );
-                    p = null;
-                    i--;
-                }
-                else if(en.base.cell == nex){
-                    pl.erase(p.c);
-                    p = null;
-                    i--;
-                    en.base.health--;
-                }
-                if( p != null && pl.base.cell != nex) p.relocate( nex );
             }
 
         }
@@ -498,16 +515,17 @@ public class Game extends Page {
     private void endTurn(){
         for(Pawn p : p0.pawns){
             p.isRotatable = false;
+            p.speed = false;
+            p.portal = false;
+            p.pawnImage.toFront();
         }
         for(Pawn p : p1.pawns){
             p.isRotatable = false;
+            p.speed = false;
+            p.portal = false;
+            p.pawnImage.toFront();
         }
-        for (int i = 0; i < rows; i++){
-            for(int j = 0; j < columns; j++){
-                if(cells[i][j] != null)
-                    cells[i][j].isRotatable = false;
-            }
-        }
+        rotating = null;
         if(p0.base.health == 0 || p1.base.health == 0){
             String winner = (turn == 0) ? "Red" : "Blue";
             Alert endGame = new Alert(Alert.AlertType.INFORMATION);
