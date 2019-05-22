@@ -68,7 +68,7 @@ public class Game extends Page {
     private double btny = 80;
 
     public ImageView helpImage;
-    private Image help = new Image(new FileInputStream("resources/bluerobot.png"));
+    private Image help = new Image(new FileInputStream("resources/qm.png"));
 
     private ArrayList< Button > butEvents;
     private Cell rotating;
@@ -102,23 +102,23 @@ public class Game extends Page {
     private void setHelpImage() {
         helpImage = new ImageView( help );
         helpImage.setLayoutX(50);
-        helpImage.setLayoutY(50);
+        helpImage.setLayoutY(0);
         helpImage.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if( event.getButton() == MouseButton.PRIMARY ) {
                 Alert endGame = new Alert(Alert.AlertType.INFORMATION);
                 endGame.setHeaderText( "Command!!" );
                 endGame.setContentText("Start the game with placing your 9 pawn and assign them a direction.\n" +
                         "\n" +
-                        "Cast a spell each turn:\n" +
+                        "Make moves each turn:\n" +
                         "Redirect: Give a piece ability change its direction. Right click to change\n" +
-                        "Guard: Put a block so that nobody go there.\n" +
+                        "Guard: Put a block so that nobody goes there.\n" +
                         "Burn: Put a lava that kills anybody going there.\n" +
                         "Rotate: Give a piece rotation ability. Press R to rotate its surroundings.\n" +
                         "Speed: Your pawn moves double!\n" +
                         "Portal: Your pawn passes all the blocks in its way.\n" +
                         "Range: Your pawn will kill its surroundings after it finishes to go 1 cell forward.\n" +
                         "\n" +
-                        "The one placing its 3 pawns to enemy cell will be the winner.\n" +
+                        "The one reaching enemy base with 3 pawns to enemy cell will be the winner.\n" +
                         "\n" +
                         "Have Fun!\n");
                 endGame.setTitle("Help");
