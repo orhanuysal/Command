@@ -68,7 +68,7 @@ public class Game extends Page {
     private double btny = 80;
 
     public ImageView helpImage;
-    private Image help = new Image(new FileInputStream("resources/bluerobot.png"));
+    private Image help = new Image(new FileInputStream("resources/qm.png"));
 
     private ArrayList< Button > butEvents;
     private Cell rotating;
