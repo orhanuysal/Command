@@ -80,4 +80,10 @@ public class Player {
         }
         return res;
     }
+
+    public boolean isAvailable(Cell c) {
+        for(Pawn p: pawns)
+            if( p.c.equals( c ) ) return false;
+        return true;
+    }
 }

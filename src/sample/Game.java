@@ -15,6 +15,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.GridPane;
@@ -60,6 +62,8 @@ public class Game extends Page {
     private int rotationVal;
     private double btny = 80;
 
+    private ArrayList< Button > butEvents;
+
     public Game(GridPane root) {
 
         this.root = root;
@@ -96,9 +100,11 @@ public class Game extends Page {
         guardB = new Button("Guard");
         guardB.setVisible(false);
         guardB.setOnAction(event -> {
-            guard();
-            Button btn = (Button)event.getSource();
-            btn.setDisable(true);
+            if( selected != null && selected.contains == turn+1 ) {
+                guard();
+                Button btn = (Button)event.getSource();
+                btn.setDisable(true);
+            }
         });
         guardL = new Label();
         guardL.setVisible(false);
@@ -106,9 +112,11 @@ public class Game extends Page {
         burnB = new Button("Burn");
         burnB.setVisible(false);
         burnB.setOnAction(event -> {
-            burn();
-            Button btn = (Button)event.getSource();
-            btn.setDisable(true);
+            if( selected != null && selected.contains == turn+1 ) {
+                burn();
+                Button btn = (Button)event.getSource();
+                btn.setDisable(true);
+            }
         });
         burnL = new Label();
         burnL.setVisible(false);
@@ -117,9 +125,11 @@ public class Game extends Page {
         speedB = new Button("Speed");
         speedB.setVisible(false);
         speedB.setOnAction(event -> {
-            speed();
-            Button btn = (Button)event.getSource();
-            btn.setDisable(true);
+            if( selected != null && selected.contains == turn+1 ) {
+                speed();
+                Button btn = (Button) event.getSource();
+                btn.setDisable(true);
+            }
         });
         speedL = new Label();
         speedL.setVisible(false);
@@ -127,9 +137,11 @@ public class Game extends Page {
         rotateB = new Button("Rotate");
         rotateB.setVisible(false);
         rotateB.setOnAction(event -> {
-            rotate();
-            Button btn = (Button)event.getSource();
-            btn.setDisable(true);
+            if( selected != null && selected.contains == turn+1 ) {
+                rotate();
+                Button btn = (Button)event.getSource();
+                btn.setDisable(true);
+            }
         });
         rotateL = new Label();
         rotateL.setVisible(false);
@@ -137,9 +149,11 @@ public class Game extends Page {
         redirectB = new Button("Redirect");
         redirectB.setVisible(false);
         redirectB.setOnAction(event -> {
-            redirect();
-            Button btn = (Button)event.getSource();
-            btn.setDisable(true);
+            if( selected != null && selected.contains == turn+1 ) {
+                redirect();
+                Button btn = (Button)event.getSource();
+                btn.setDisable(true);
+            }
         });
         redirectL = new Label();
         redirectL.setVisible(false);
@@ -147,9 +161,11 @@ public class Game extends Page {
         rangeB = new Button("Range");
         rangeB.setVisible(false);
         rangeB.setOnAction(event -> {
-            range();
-            Button btn = (Button)event.getSource();
-            btn.setDisable(true);
+            if( selected != null && selected.contains == turn+1 ) {
+                range();
+                Button btn = (Button)event.getSource();
+                btn.setDisable(true);
+            }
         });
         rangeL = new Label();
         rangeL.setVisible(false);
@@ -157,9 +173,11 @@ public class Game extends Page {
         portalB = new Button("Portal");
         portalB.setVisible(false);
         portalB.setOnAction(event -> {
-            portal();
-            Button btn = (Button)event.getSource();
-            btn.setDisable(true);
+            if( selected != null && selected.contains == turn+1 ) {
+                portal();
+                Button btn = (Button)event.getSource();
+                btn.setDisable(true);
+            }
         });
         portalL = new Label();
         portalL.setVisible(false);
@@ -200,12 +218,14 @@ public class Game extends Page {
         return selected;
     }
 
+
     private void showButton(Button btn){
         btn.setLayoutY(btny); //lbl.setLayoutY(btny);
         btn.setLayoutX(45); //lbl.setLayoutX(btn.getLayoutX() + btn.getWidth());
         btn.setDisable(false);
         btny += HEIGHT + 10;
         btn.setVisible(true); //lbl.setVisible(true);
+        butEvents.add( btn );
     }
 
     private void addButtons() {
@@ -215,11 +235,14 @@ public class Game extends Page {
 
         clearButtons();
         clearLabels();
+        butEvents = new ArrayList<>();
         showButton(finishTurnB);
 
         ArrayList<Move> buttonsToShow = currentPlayer.getPossibleMoves();
         fillMoveCount(buttonsToShow);
         fillLabels();
+
+
 
         for (Move bts : buttonsToShow){
             switch (bts.getType()){
@@ -283,6 +306,16 @@ public class Game extends Page {
                     System.out.println("button type: " + bts.getType());
             }
         }
+
+        pen.setOnKeyPressed( event -> {
+            switch (event.getCode()) {
+                case DIGIT1: butEvents.get(0).fire(); break;
+                case DIGIT2: butEvents.get(1).fire(); break;
+                case DIGIT3: butEvents.get(2).fire(); break;
+                case DIGIT4: butEvents.get(3).fire(); break;
+                case DIGIT5: butEvents.get(4).fire(); break;
+            }
+        } );
         setBackgroundColor();
     }
 
@@ -371,7 +404,6 @@ public class Game extends Page {
 
     private void portal() {
         System.out.println("On Portal!!");
-        if (moveCounts.get(Move.type.PORTAL) > 0) {
             int p = Cell.PAWN;
             if( turn == 1 ) p = Cell.PAWN2;
 
@@ -384,7 +416,6 @@ public class Game extends Page {
             if(moveCounts.get(Move.type.PORTAL) == 0){
                 portalB.setDisable(true);
             }
-        }
         fillLabels();
     }
 
@@ -440,13 +471,14 @@ public class Game extends Page {
                     en.erase( nex );
                 }
                 else if( nex.contains == Cell.LAVA ) { //TODO: BUG VAR BUNDA. Lavi silmemesi lazim
-                    p.relocate( nex );
-                    pl.erase( nex );
+                    pl.erase( p.c );
+                    p = null;
                     i--;
                 }
                 else if(en.base.cell == nex){
                     pl.erase(p.c);
                     p = null;
+                    i--;
                     en.base.health--;
                 }
                 if( p != null && pl.base.cell != nex) p.relocate( nex );
@@ -487,6 +519,8 @@ public class Game extends Page {
             endGame.showAndWait();
         }
     }
+
+    // ================================================================================== STAGE 0
 
     private void setBackgroundColor(){
         if(turn == 1){
@@ -553,7 +587,7 @@ public class Game extends Page {
 
     private void placePawn(Cell c, int team) throws FileNotFoundException {
         Player currentPlayer = (team == 0) ? p0 : p1;
-        if (currentPlayer.pawnsToPlace > 0) {
+        if (currentPlayer.pawnsToPlace > 0 && currentPlayer.isAvailable( c )) {
             Pawn p = new Pawn(c, team);
             currentPlayer.addPawn( p );
             p.draw(pen);
@@ -613,10 +647,10 @@ public class Game extends Page {
                     }
         } else {
             clear();
-            for(int i=columns-2;i<columns;i++)
-                for(int j=0;j<rows;j++)
+            for(int i=0;i<rows;i++)
+                for(int j=columns-2;j<columns;j++)
                     if (cells[i][j] != null && cells[i][j].contains == Cell.EMPTY) {
-                        cells[j][i].setIsPossible(1);
+                        cells[i][j].setIsPossible(1);
                     }
         }
         cells[rows/2][0].setIsPossible(0);
