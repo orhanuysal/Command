@@ -19,12 +19,14 @@ public class Pawn {
     public int direction;
     public int team;
     public ImageView pawnImage;
+    public int speed = 0;
     private Image bluerobot = new Image(new FileInputStream("src//assets//bluerobot.png"));
     private Image redrobot = new Image(new FileInputStream("src//assets//redrobot.png"));
     private double height;
     private double width;
 
     public Pawn( Cell c, int team ) throws FileNotFoundException {
+        speed = 0;
         this.c = c;
         direction = 2;
         this.team = team;
