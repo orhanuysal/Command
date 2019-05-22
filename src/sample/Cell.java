@@ -34,9 +34,11 @@ public class Cell extends Parent {
     public Game game;
 
     public HashMap< Integer, Cell > adj;
+    public boolean isRotatable;
 
     public Cell(double x, double y, int idx, int idy, Group root, Game game) {
         this.game = game;
+        isRotatable = false;
         this.idx = idx;
         this.idy = idy;
         adj = new HashMap<>();

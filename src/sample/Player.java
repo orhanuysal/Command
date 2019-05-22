@@ -4,6 +4,7 @@ import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 
 public class Player {
     private ArrayList<Pair<Double,Double>> coords;
@@ -85,5 +86,12 @@ public class Player {
         for(Pawn p: pawns)
             if( p.c.equals( c ) ) return false;
         return true;
+    }
+
+    public Pawn get(Cell value) {
+        for(Pawn p:pawns)
+            if( p.c.equals( value ) )
+                return p;
+        return null;
     }
 }
