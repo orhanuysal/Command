@@ -97,6 +97,7 @@ public class Cell extends Parent {
         if( contains == EMPTY ) {
             this.hexagon.setStroke( Color.BLACK );
             this.hexagon.setStrokeWidth(1);
+            this.toBack();
         }
         if( contains == BASE) hexagon.setFill(Color.BLACK);
         if( contains == LAVA ) {

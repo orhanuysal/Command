@@ -110,7 +110,7 @@ public class Game extends Page {
                 endGame.setContentText("Start the game with placing your 9 pawn and assign them a direction.\n" +
                         "\n" +
                         "Make moves each turn:\n" +
-                        "Redirect: Give a piece ability change its direction. Right click to change. \n" +
+                        "Redirect: Give a piece ability change its direction. Right click to change\n" +
                         "Guard: Put a block so that nobody goes there.\n" +
                         "Burn: Put a lava that kills anybody going there.\n" +
                         "Rotate: Give a piece rotation ability. Press R to rotate its surroundings.\n" +
@@ -542,10 +542,12 @@ public class Game extends Page {
                     if (p != null && pl.base.cell != nex) p.relocate(nex);
                 }
             }
-            if( p.range ) {
-                for(Map.Entry<Integer, Cell> c: p.c.adj.entrySet() ) {
-                    if (c.getValue().contains == (turn ^ 1) + 1) {
-                        en.erase(c.getValue());
+            if (p != null) {
+                if( p.range ) {
+                    for(Map.Entry<Integer, Cell> c: p.c.adj.entrySet() ) {
+                        if (c.getValue().contains == (turn ^ 1) + 1) {
+                            en.erase(c.getValue());
+                        }
                     }
                 }
             }
@@ -570,13 +572,14 @@ public class Game extends Page {
             p.speed = false;
             p.portal = false;
             p.range = false;
+            p.pawnImage.toFront();
         }
         for(Pawn p : p1.pawns){
             p.isRotatable = false;
             p.speed = false;
             p.portal = false;
             p.range = false;
-
+            p.pawnImage.toFront();
         }
         rotating = null;
         if(p0.base.health == 0 || p1.base.health == 0){
