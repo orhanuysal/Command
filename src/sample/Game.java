@@ -110,6 +110,7 @@ public class Game extends Page {
                 endGame.setContentText("Start the game with placing your 9 pawn and assign them a direction.\n" +
                         "\n" +
                         "Cast a spell each turn:\n" +
+                        "Redirect: Give a piece ability change its direction. Right click to change\n" +
                         "Guard: Put a block so that nobody go there.\n" +
                         "Burn: Put a lava that kills anybody going there.\n" +
                         "Rotate: Give a piece rotation ability. Press R to rotate its surroundings.\n" +
