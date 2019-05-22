@@ -68,7 +68,7 @@ public class Game extends Page {
     private double btny = 80;
 
     public ImageView helpImage;
-    private Image help = new Image(new FileInputStream("resources/qm.png"));
+    private Image help = new Image(new FileInputStream("resources/bluerobot.png"));
 
     private ArrayList< Button > butEvents;
     private Cell rotating;
@@ -120,6 +120,8 @@ public class Game extends Page {
                         "\n" +
                         "The one reaching enemy base with 3 pawns to enemy cell will be the winner.\n" +
                         "\n" +
+                        "You can use keyboard shortcuts 1, 2, 3, 4 and 5 to press buttons from up to down.\n" +
+                        "(press 1 to Finish Turn etc.)\n" +
                         "Have Fun!\n");
                 endGame.setTitle("Help");
                 endGame.showAndWait();
