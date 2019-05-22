@@ -17,6 +17,7 @@ public class Pawn {
     public Cell c;
     public boolean speed;
     public boolean portal;
+    public boolean range;
     private ArrayList<Move> moves;
     public int direction;
     public int team;
@@ -28,7 +29,7 @@ public class Pawn {
     public boolean isRotatable;
 
     public Pawn( Cell c, int team ) throws FileNotFoundException {
-        speed = portal = false;
+        speed = portal = range = false;
         this.c = c;
         direction = 2;
         this.team = team;

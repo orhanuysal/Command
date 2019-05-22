@@ -455,12 +455,10 @@ public class Game extends Page {
 
     private void range() {
         System.out.println("On Range!!");
-        if(moveCounts.get(Move.type.RANGE) > 0){
-            if (selected.contains == ownpawn) {
-                moveCounts.put(Move.type.RANGE, moveCounts.get(Move.type.RANGE)-1);
-            }
-            if(moveCounts.get(Move.type.RANGE) == 0){
-                rangeB.setDisable(true);
+        Player currentPlayer = (turn == 0) ? p0 : p1;
+        for (Pawn p : currentPlayer.pawns) {
+            if (p.c == selected) {
+                p.range = true;
             }
         }
         fillLabels();
@@ -480,30 +478,24 @@ public class Game extends Page {
             Pawn p = pl.pawns.get(i);
 
             int d = p.direction;
-
-            int rep = p.speed? 2:1;
-            while(rep-- > 0) {
-                Cell nex = p.c.adj.get( d );
-                if( p.portal )
-                    while( nex != null && nex.contains == Cell.BLOCK )
-                        nex = nex.adj.get( d );
-                if (nex != null && nex.contains != Cell.BLOCK && nex.contains != ownpawn) {
-                    if (nex.contains == (turn ^ 1) + 1) {
-                        en.erase(nex);
-                    } else if (nex.contains == Cell.LAVA) {
-                        pl.erase(p.c);
-                        p = null;
-                        i--;
-                    } else if (en.base.cell == nex) {
-                        pl.erase(p.c);
-                        p = null;
-                        i--;
-                        en.base.health--;
-                    }
-                    if (p != null && pl.base.cell != nex) p.relocate(nex);
+            Cell nex = p.c.adj.get( d );
+            if( nex != null && nex.contains != Cell.BLOCK && nex.contains != ownpawn ) {
+                if( nex.contains == (turn^1)+1 ) {
+                    en.erase( nex );
                 }
+                else if( nex.contains == Cell.LAVA ) { //TODO: BUG VAR BUNDA. Lavi silmemesi lazim
+                    pl.erase( p.c );
+                    p = null;
+                    i--;
+                }
+                else if(en.base.cell == nex){
+                    pl.erase(p.c);
+                    p = null;
+                    i--;
+                    en.base.health--;
+                }
+                if( p != null && pl.base.cell != nex) p.relocate( nex );
             }
-
 
         }
         endTurn();
@@ -520,15 +512,18 @@ public class Game extends Page {
     }
 
     private void endTurn(){
-        for(Pawn p : p0.pawns){
+        for(Pawn p : p0.pawns) {
             p.isRotatable = false;
             p.speed = false;
             p.portal = false;
+            p.range = false;
         }
         for(Pawn p : p1.pawns){
             p.isRotatable = false;
             p.speed = false;
             p.portal = false;
+            p.range = false;
+
         }
         rotating = null;
         if(p0.base.health == 0 || p1.base.health == 0){
